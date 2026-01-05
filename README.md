@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌌 DropMasters v10.6 - Neural Dropshipping Engine
 
-## Getting Started
+Plataforma de e-commerce de ultra-alta performance baseada em Next.js 16, otimizada para **Custo Zero**, **Estoque Zero** e **Rendimento Automático**.
 
-First, run the development server:
+## 🚀 Diferenciais Alpha 2026
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Infraestrutura Serverless**: Custo inicial zero utilizando Next.js SSG/ISR.
+- **Neural Pricing**: Precificação dinâmica via IA que ajusta margens baseado em demanda.
+- **Automação de Repasse**: Sistema de checkout com lógica de proteção de lucro e repasse direto ao fornecedor.
+- **Performance Alpha**: 
+  - Renderização estática com regeneração incremental (ISR).
+  - Aceleração de animações por GPU.
+  - Otimização de imagens LCP inteligente.
+- **Global Reach**: Pronta para operações cross-border com baixa latência global.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tecnologias de Elite
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: React 19 + Next.js 16 (Turbopack Powered)
+- **Styling**: Vanilla CSS Premium (Glassmorphism & Cyberpunk Aesthetics)
+- **Database**: Supabase (Real-time & AI Analytics)
+- **Icons**: Lucide React
+- **Animations**: Framer Motion (Optimized)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📦 Como Iniciar a Operação
 
-## Learn More
+1. **Configuração de Variáveis**:
+   Crie um arquivo `.env.local` com suas credenciais do **Supabase** e **Secrets** de administração.
 
-To learn more about Next.js, take a look at the following resources:
+2. **Instalação**:
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. **Build de Produção (SSG)**:
+   ```bash
+   npm run build
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Modo Desenvolvimento**:
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+## 💰 Modelo de Negócio
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Este sistema foi projetado para gerar **rendimento a curto prazo** sem a necessidade de investimentos pesados em infraestrutura. O foco é a venda de produtos virais com intermediação automática, onde a plataforma atua como o cérebro lógico e o fornecedor cuida da logística física (Estoque Zero).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Gerado e mantido por Antigravity AI - Advanced Agentic Coding.*
