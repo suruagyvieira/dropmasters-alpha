@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: 'C:/Users/Douglas/Desenvolvimento/frontend'
-  },
+  /* Configurações de performance */
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
