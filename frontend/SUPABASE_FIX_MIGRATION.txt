@@ -1,0 +1,63 @@
+-- ============================================================
+-- SCRIPT DE CORREÇÃO E MIGRAÇÃO - DROPMASTERS 2026
+-- Instruções: Copie todo este conteúdo, cole no SQL Editor do
+-- Supabase e clique em 'Run'.
+-- ============================================================
+
+-- 1. CORREÇÃO DE ESTRUTURA (Adiciona colunas faltantes)
+ALTER TABLE public.products 
+ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
+
+-- 2. GARANTIR QUE RLS ESTÁ ATIVO EM TODAS AS TABELAS
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.logs ENABLE ROW LEVEL SECURITY;
+
+-- 3. LIMPEZA DE POLÍTICAS ANTIGAS (Evita conflitos)
+DROP POLICY IF EXISTS "Public: Read products" ON public.products;
+DROP POLICY IF EXISTS "Admin: Full access" ON public.products;
+DROP POLICY IF EXISTS "Allow public read access" ON public.products;
+
+DROP POLICY IF EXISTS "Public: Create order" ON public.orders;
+DROP POLICY IF EXISTS "Admin/Self: Read order" ON public.orders;
+DROP POLICY IF EXISTS "Allow public insert" ON public.orders;
+DROP POLICY IF EXISTS "Allow public select" ON public.orders;
+
+DROP POLICY IF EXISTS "System: Record logs" ON public.logs;
+DROP POLICY IF EXISTS "Admin: Read logs" ON public.logs;
+DROP POLICY IF EXISTS "Allow public insert" ON public.logs;
+DROP POLICY IF EXISTS "Allow public select" ON public.logs;
+DROP POLICY IF EXISTS "Public: Record demand/errors" ON public.logs;
+
+-- ==========================================
+-- 4. IMPLEMENTAÇÃO DE POLÍTICAS DE ELITE
+-- ==========================================
+
+-- PRODUTOS: Leitura pública, Escrita restrita ao Admin
+CREATE POLICY "Public: Read products" ON public.products 
+FOR SELECT TO public USING (is_active = true);
+
+CREATE POLICY "Admin: Full access" ON public.products 
+FOR ALL TO authenticated USING (true);
+
+-- PEDIDOS: Público pode comprar (INSERT), mas só o dono vê (SELECT)
+CREATE POLICY "Public: Create order" ON public.orders 
+FOR INSERT TO public WITH CHECK (true);
+
+CREATE POLICY "Admin/Self: Read order" ON public.orders 
+FOR SELECT TO authenticated 
+USING (auth.uid()::text = user_id OR auth.jwt() ->> 'email' = email);
+
+-- LOGS: Proteção Total. Público só grava erro/demanda. Admin vê tudo.
+CREATE POLICY "Admin: Read logs" ON public.logs 
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "System: Record logs" ON public.logs 
+FOR INSERT TO authenticated WITH CHECK (true);
+
+CREATE POLICY "Public: Record demand/errors" ON public.logs 
+FOR INSERT TO public WITH CHECK (type IN ('demand_miss', 'error'));
+
+-- ============================================================
+-- FIM DO SCRIPT - SISTEMA BLINDADO E OPERACIONAL
+-- ============================================================
