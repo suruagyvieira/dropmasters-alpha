@@ -4,9 +4,12 @@ import { findGlobalProductByName } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * CHECKOUT API v9.3 - "LOGISTIC PAYOUT ENGINE"
+ * CHECKOUT API v9.4 - "SINGLE-PASS KERNEL"
  * ═══════════════════════════════════════════════════════════════════════════════
  * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SECURE & FAST CHECKOUT]
+ * 
+ * Update v9.4: Combined loops for atomic price validation and cost calculation.
+ * Ensures location-based yield optimization (60% vs 68% cost) is perfectly accurate.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -47,23 +50,26 @@ export async function POST(request: Request) {
             realProducts = data || [];
         }
 
-        // TOTAL CALCULATION - SECURE VALIDATION & LOGISTIC ENRICHMENT
-        const total = items.reduce((acc: number, item: any) => {
+        // ══════════════════════════════════════════════════════════════════════════════
+        // ATOMIC CALCULATION KERNEL (Validation + Enrichment + Payout)
+        // Single-pass reduction for maximum performance O(N)
+        // ══════════════════════════════════════════════════════════════════════════════
+        const { total, estimatedVendorCost } = items.reduce((acc: { total: number, estimatedVendorCost: number }, item: any) => {
             const dbProduct = realProducts.find((p: any) => p.id === item.id);
 
             let realPrice: number;
+
+            // 1. PRICE VALIDATION
             if (dbProduct) {
-                // Internal product - use DB price (Highest Security)
+                // Internal
                 realPrice = Number(dbProduct.price);
             } else if (item.id.startsWith('sup_') || item.id.startsWith('flash_')) {
-                // Sourced/Flash product - Validate Expiration & Price
+                // Sourced / Flash
                 if (item.id.startsWith('flash_')) {
                     const parts = item.id.split('_');
                     if (parts.length >= 2) {
                         const timestamp = Number(parts[1]);
-                        // 24 hours = 86400000 ms expiration window
                         if (!isNaN(timestamp) && (Date.now() - timestamp > 86400000)) {
-                            // Throwing error inside reduce is caught by outer try/catch
                             throw new Error(`Oferta Flash expirada para o produto: ${item.name}. Busque novamente.`);
                         }
                     }
@@ -72,17 +78,16 @@ export async function POST(request: Request) {
                 const globalProduct = findGlobalProductByName(item.name);
 
                 if (globalProduct) {
-                    realPrice = globalProduct.price; // Use Trustworthy Catalog Price
+                    realPrice = globalProduct.price;
 
-                    // CRITICAL: Enrich Order with Logistic Data for Automated Payouts
-                    // Stores exactly which supplier/location fulfilled this order
+                    // 2. LOGISTIC ENRICHMENT
                     item.supplier = globalProduct.supplier;
                     item.location = globalProduct.location;
                     item.fulfillment_type = globalProduct.location ? `local_hub_${globalProduct.location}` : 'global_center';
 
                 } else {
                     console.warn(`[CHECKOUT] Unverified sourced product price used: ${item.name}`);
-                    realPrice = Number(item.price) || 99.90; // Fallback
+                    realPrice = Number(item.price) || 99.90;
                     item.supplier = 'Unknown_Sourcing';
                     item.location = 'Global';
                 }
@@ -90,37 +95,44 @@ export async function POST(request: Request) {
                 realPrice = 99.90;
             }
 
+            // 3. TOTAL CALCULATION
             const quantity = Math.max(1, Math.min(10, Number(item.quantity) || 1));
             const itemPrice = quantity >= 2 ? realPrice * 0.9 : realPrice; // 10% bundle discount
-            return acc + (quantity * itemPrice);
-        }, 0);
+            const lineTotal = quantity * itemPrice;
 
-        // PAYOUT CALCULATION (Zero Stock Model)
-        // PAYOUT CALCULATION (Zero Stock Model - Dynamic Yield)
-        // Optimization: Local suppliers have lower shipping costs, increasing our margin to 40%.
-        const estimatedVendorCost = items.reduce((acc: number, item: any) => {
-            const itemTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
-            // If location is specific (e.g. SP, SC) -> 60% cost. Global -> 68% cost.
-            const costRatio = (item.location && item.location.length === 2) ? 0.60 : 0.68;
-            return acc + (itemTotal * costRatio);
-        }, 0);
+            // 4. COST CALCULATION (Dynamic Yield)
+            // Local (SP, SC, etc) -> 60% Cost ratio (Higher Profit)
+            // Global -> 68% Cost ratio (Lower Profit, higher shipping/risk)
+            const costRatio = (item.location && item.location.length === 2 && item.location !== 'Global') ? 0.60 : 0.68;
+            // Cost is based on real selling price (without bundle discount usually, but assuming we absorb discount)
+            // To be safe/conservative, we calculate cost based on realPrice (undiscounted)
+            const lineCost = (realPrice * quantity) * costRatio;
 
+            return {
+                total: acc.total + lineTotal,
+                estimatedVendorCost: acc.estimatedVendorCost + lineCost
+            };
+
+        }, { total: 0, estimatedVendorCost: 0 });
+
+
+        // PAYOUT CALCULATION (Using Atomic Results)
         const vendorSplit = Number(estimatedVendorCost.toFixed(2)); // To Supplier
         const platformProfit = Number((total - vendorSplit).toFixed(2)); // Net Profit
         const affiliateCommission = affiliate_code ? Number((platformProfit * 0.20).toFixed(2)) : 0; // 20% of Net
         const finalProfit = Number((platformProfit - affiliateCommission).toFixed(2)); // Final Platform Earnings
 
-        // TRANSACTION ID (Unique, trackable)
+        // TRANSACTION ID
         const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
-        // PARALLEL DB OPERATIONS (Performance optimization)
+        // PARALLEL DB INSERT
         const orderData = {
             transaction_id: transactionId,
             user_id: user_id || null,
             email: email || null,
             phone: phone || null,
-            total: total,
-            items: items, // Now contains enriched logistics data (supplier, location)
+            total: Number(total.toFixed(2)),
+            items: items, // Contains enriched logistics data
             status: 'pending',
             affiliate_ref: affiliate_code || null,
             payment_method: method || 'pix',
@@ -141,7 +153,6 @@ export async function POST(request: Request) {
             created_at: new Date().toISOString()
         };
 
-        // Execute in parallel for speed
         const [orderResult] = await Promise.all([
             supabase.from('orders').insert(orderData).select('id').single(),
             supabase.from('logs').insert(logData)
@@ -152,7 +163,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
         }
 
-        // RESPONSE (Structured for frontend)
+        // RESPONSE
         return NextResponse.json({
             transaction_id: transactionId,
             status: 'pending',
@@ -161,7 +172,7 @@ export async function POST(request: Request) {
             checkout_url: `https://quantum-gateway.com/pay/${transactionId}`,
             total: Number(total.toFixed(2)),
             metadata: {
-                message: IS_REAL_GATEWAY ? 'Gateway de Produção Ativo' : 'Modo Simulação Alpha',
+                message: IS_REAL_GATEWAY ? 'Gateway de Produção Ativo' : 'Modo Simulação Alpha (Yield Optimized)',
                 profit: finalProfit,
                 stock: 'Zero Stock Fulfillment'
             }
@@ -169,7 +180,6 @@ export async function POST(request: Request) {
 
     } catch (e: any) {
         console.error('[CHECKOUT] Critical error:', e.message);
-        // Retorna erro específico se for expiração, 500 se for outro
         const status = e.message.includes('expirada') ? 400 : 500;
         return NextResponse.json({ error: e.message || 'Checkout failed' }, { status });
     }
