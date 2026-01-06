@@ -54,13 +54,13 @@ export const MOCK_PRODUCTS: Product[] = [
     },
     {
         id: "prod_004",
-        name: "Lâmpada LED RGB Wi-Fi",
+        name: "Lâmpada LED RGB Wi-Fi Smart",
         price: 39.90,
         category: "Casa Inteligente",
-        image_url: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=500&auto=format&fit=crop&q=60",
+        image_url: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=800&auto=format&fit=crop&q=80",
         original_price: 89.90,
-        demand_score: 85,
-        description: "Controle por voz e app."
+        demand_score: 91,
+        description: "Transforme qualquer ambiente com um toque no celular. 16 milhões de cores, controle por voz (Alexa/Google) e agendamento inteligente. Economia de energia de até 80% com tecnologia Bio-LED."
     }
 ];
 
