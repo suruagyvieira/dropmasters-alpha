@@ -92,6 +92,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     const [isSearching, setIsSearching] = useState(false);
     const [searchSource, setSearchSource] = useState<'flash' | 'internal' | 'none' | null>(null);
     const [searchMessage, setSearchMessage] = useState('');
+    const [geoInfo, setGeoInfo] = useState<{ city: string, region: string } | null>(null);
 
     // ⚡ FLASH SEARCH: Busca instantânea em fornecedores globais
     useEffect(() => {
@@ -100,18 +101,19 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 setProducts(initialProducts);
                 setSearchSource(null);
                 setSearchMessage('');
+                setGeoInfo(null);
             }
             return;
         }
 
-        // Debounce reduzido para agilidade (300ms)
+        // Debounce reduzido (300ms)
         const delayDebounce = setTimeout(async () => {
             setIsSearching(true);
             setSearchSource(null);
             setSearchMessage('⚡ Buscando na rede global...');
+            setGeoInfo(null);
 
             try {
-                // DIRETO para Flash Sourcing API - AGILIDADE MÁXIMA
                 const sourcingUrl = `/api/v2/sourcing?q=${encodeURIComponent(searchTerm)}`;
                 const response = await fetchApi(sourcingUrl);
 
@@ -119,6 +121,11 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                     setProducts(response.products);
                     setSearchSource('flash');
                     setSearchMessage(`⚡ ${response.products.length} produto(s) disponíveis para venda IMEDIATA`);
+
+                    // Capture Logistics Info
+                    if (response.user_location) {
+                        setGeoInfo(response.user_location);
+                    }
                 } else {
                     // Fallback: Tenta catálogo interno
                     const internalUrl = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
@@ -140,7 +147,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             } finally {
                 setIsSearching(false);
             }
-        }, 300); // 300ms para agilidade
+        }, 300);
 
         return () => clearTimeout(delayDebounce);
     }, [searchTerm, mounted, initialProducts]);
@@ -257,12 +264,18 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                     {searchSource === 'flash' && (
                         <>
                             <Zap size={20} color="var(--primary)" fill="var(--primary)" />
-                            <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)' }}>
-                                    ⚡ FLASH SOURCING - VENDA IMEDIATA
+                            <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <span>⚡ FLASH SOURCING - VENDA IMEDIATA</span>
+                                    {geoInfo && (
+                                        <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem' }}>
+                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
+                                            PRIORIDADE: ESTOQUE {geoInfo.region}
+                                        </span>
+                                    )}
                                 </div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos prontos para intermediação. Você ganha 35% em cada venda! | Entrega: 7-15 dias
+                                    Produtos prontos para intermediação. Você ganha 35% em cada venda! | Entrega: {geoInfo ? '1-3 dias (Otimizado)' : '7-15 dias'}
                                 </div>
                             </div>
                         </>

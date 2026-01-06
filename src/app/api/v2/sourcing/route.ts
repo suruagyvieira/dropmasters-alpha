@@ -4,12 +4,12 @@ import { GLOBAL_PRODUCT_CATALOG, normalize } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * FLASH SOURCING API v2.2 - "LOGISTICS INTELLIGENCE"
+ * FLASH SOURCING API v2.3 - "CACHED INTELLIGENCE"
  * ═══════════════════════════════════════════════════════════════════════════════
- * Modelo: INTERMEDIADOR ÁGIL + LOGÍSTICA DE PROXIMIDADE
+ * Modelo: INTERMEDIADOR ÁGIL + LOGÍSTICA DE PROXIMIDADE + EDGE CACHING
  * - Detecta região do usuário via IP (Vercel Headers)
  * - Prioriza fornecedores LOCAIS para reduzir custo e tempo de envio
- * - Retorna metadados logísticos
+ * - Implementa Cache-Control para performance extrema (Zero Latency)
  * 
  * [ZERO STOCK] | [SMART LOGISTICS] | [AUTO PAYOUT] | [INSTANT YIELD]
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -99,7 +99,7 @@ export async function GET(request: Request) {
 
     // Vercel Geolocation Headers
     const city = request.headers.get('x-vercel-ip-city') || 'São Paulo';
-    const region = request.headers.get('x-vercel-ip-country-region') || 'SP'; // Default SP for dev
+    const region = request.headers.get('x-vercel-ip-country-region') || 'SP';
 
     if (!query || query.length < 2) {
         return NextResponse.json({
@@ -114,8 +114,17 @@ export async function GET(request: Request) {
     // Busca com Inteligência Logística
     const flashProducts = searchProducts(query, region);
 
+    // HEADERS DE CACHE PARA PERFORMANCE EXTREMA
+    const headers = {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
+    };
+
     if (flashProducts.length > 0) {
+        // Log "Fire-and-Forget": Não damos await para não bloquear a resposta
+        // Em Vercel Edge/Serverless, isso pode ser cortado se a função terminar muito rápido,
+        // mas é um trade-off aceitável para performance. Para garantias, usamos `waitUntil`.
         if (supabase) {
+            // Nota: Para logs críticos, usaríamos p-retry ou waitUntil. Aqui é analytics.
             void supabase.from('logs').insert({
                 type: 'flash_sourcing_logistics',
                 message: `🚚 LOGISTICS: Busca "${query}" (${city}-${region}) → ${flashProducts.length} produtos. Local Matches: ${flashProducts.filter(p => p.is_local).length}`,
@@ -130,7 +139,7 @@ export async function GET(request: Request) {
             user_location: { city, region },
             message: `${flashProducts.length} produto(s) encontrados. Priorizando fornecedores próximos de ${region}.`,
             expires_in: '24 horas'
-        });
+        }, { headers });
     }
 
     // Nada encontrado
@@ -147,5 +156,5 @@ export async function GET(request: Request) {
         count: 0,
         source: 'none',
         message: `Nenhum produto encontrado para "${query}".`
-    });
+    }, { headers });
 }
