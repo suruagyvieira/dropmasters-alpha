@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { ShoppingCart, Star, ExternalLink, Cpu } from 'lucide-react';
+import { ShoppingCart, Star, ExternalLink, Cpu, Clock } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 
@@ -54,11 +54,19 @@ const ProductCard = ({ id, name, price, original_price, image, category, affilia
                         <Cpu size={12} /> ESTOQUE ZERO
                     </div>
                 </div>
+
                 <div style={{ position: 'absolute', bottom: '12px', left: '12px', zIndex: 1 }}>
                     <div className="glass-premium" style={{ padding: '4px 10px', fontSize: '0.65rem', fontWeight: '700', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
                         {category}
                     </div>
                 </div>
+
+                {/* FLASH EXPIRE BADGE */}
+                {id.startsWith('flash_') && (
+                    <div className="glass-premium animate-pulse" style={{ position: 'absolute', top: '12px', left: '12px', zIndex: 1, padding: '6px 10px', fontSize: '0.65rem', fontWeight: '900', borderRadius: '8px', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Clock size={12} /> FLASH: 24h
+                    </div>
+                )}
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -106,7 +114,7 @@ const ProductCard = ({ id, name, price, original_price, image, category, affilia
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

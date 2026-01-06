@@ -46,8 +46,8 @@ export async function POST(request: Request) {
             if (dbProduct) {
                 // Internal product - use DB price for security
                 realPrice = Number(dbProduct.price);
-            } else if (item.id.startsWith('sup_')) {
-                // Sourced product - use frontend price (validated by sourcing API)
+            } else if (item.id.startsWith('sup_') || item.id.startsWith('flash_')) {
+                // Sourced/Flash product - use frontend price (they're not in DB)
                 realPrice = Number(item.price) || 99.90;
             } else {
                 // Unknown product - default price

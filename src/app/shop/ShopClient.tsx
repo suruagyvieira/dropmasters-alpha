@@ -90,10 +90,10 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
-    const [searchSource, setSearchSource] = useState<'internal' | 'global_suppliers' | 'none' | null>(null);
+    const [searchSource, setSearchSource] = useState<'flash' | 'internal' | 'none' | null>(null);
     const [searchMessage, setSearchMessage] = useState('');
 
-    // AI Neural Search Core: Debounce + Global Sourcing Fallback
+    // ⚡ FLASH SEARCH: Busca instantânea em fornecedores globais
     useEffect(() => {
         if (!mounted || !searchTerm) {
             if (mounted && !searchTerm) {
@@ -104,44 +104,43 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             return;
         }
 
+        // Debounce reduzido para agilidade (300ms)
         const delayDebounce = setTimeout(async () => {
             setIsSearching(true);
             setSearchSource(null);
-            setSearchMessage('');
+            setSearchMessage('⚡ Buscando na rede global...');
 
             try {
-                // FIRST: Try internal products API
-                const internalUrl = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
-                const internalRes = await fetchApi(internalUrl);
+                // DIRETO para Flash Sourcing API - AGILIDADE MÁXIMA
+                const sourcingUrl = `/api/v2/sourcing?q=${encodeURIComponent(searchTerm)}`;
+                const response = await fetchApi(sourcingUrl);
 
-                if (Array.isArray(internalRes) && internalRes.length > 0) {
-                    setProducts(internalRes);
-                    setSearchSource('internal');
-                    setSearchMessage(`${internalRes.length} produto(s) no catálogo`);
+                if (response?.products && response.products.length > 0) {
+                    setProducts(response.products);
+                    setSearchSource('flash');
+                    setSearchMessage(`⚡ ${response.products.length} produto(s) disponíveis para venda IMEDIATA`);
                 } else {
-                    // FALLBACK: Search global suppliers
-                    setSearchMessage('Buscando nos fornecedores globais...');
+                    // Fallback: Tenta catálogo interno
+                    const internalUrl = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
+                    const internalRes = await fetchApi(internalUrl);
 
-                    const sourcingUrl = `/api/v2/sourcing?q=${encodeURIComponent(searchTerm)}`;
-                    const sourcingRes = await fetchApi(sourcingUrl);
-
-                    if (sourcingRes?.products && sourcingRes.products.length > 0) {
-                        setProducts(sourcingRes.products);
-                        setSearchSource('global_suppliers');
-                        setSearchMessage(`${sourcingRes.products.length} produto(s) de fornecedores globais`);
+                    if (Array.isArray(internalRes) && internalRes.length > 0) {
+                        setProducts(internalRes);
+                        setSearchSource('internal');
+                        setSearchMessage(`${internalRes.length} produto(s) no catálogo`);
                     } else {
                         setProducts([]);
                         setSearchSource('none');
-                        setSearchMessage(sourcingRes?.message || 'Nenhum produto encontrado');
+                        setSearchMessage(response?.message || 'Nenhum produto encontrado');
                     }
                 }
             } catch (err) {
-                console.error("Neural Search Error:", err);
+                console.error("Flash Search Error:", err);
                 setSearchMessage('Erro na busca. Tente novamente.');
             } finally {
                 setIsSearching(false);
             }
-        }, 600);
+        }, 300); // 300ms para agilidade
 
         return () => clearTimeout(delayDebounce);
     }, [searchTerm, mounted, initialProducts]);
@@ -243,27 +242,27 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                         display: 'flex',
                         alignItems: 'center',
                         gap: '15px',
-                        background: searchSource === 'global_suppliers'
-                            ? 'rgba(139, 92, 246, 0.1)'
+                        background: searchSource === 'flash'
+                            ? 'rgba(139, 92, 246, 0.15)'
                             : searchSource === 'internal'
                                 ? 'rgba(34, 197, 94, 0.1)'
                                 : 'rgba(239, 68, 68, 0.1)',
-                        borderColor: searchSource === 'global_suppliers'
+                        borderColor: searchSource === 'flash'
                             ? 'var(--primary)'
                             : searchSource === 'internal'
                                 ? '#22c55e'
                                 : '#ef4444'
                     }}
                 >
-                    {searchSource === 'global_suppliers' && (
+                    {searchSource === 'flash' && (
                         <>
-                            <Globe size={20} color="var(--primary)" />
+                            <Zap size={20} color="var(--primary)" fill="var(--primary)" />
                             <div>
                                 <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)' }}>
-                                    🌍 FORNECEDORES GLOBAIS
+                                    ⚡ FLASH SOURCING - VENDA IMEDIATA
                                 </div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos encontrados na rede de suppliers. Entrega: 7-15 dias | Estoque Zero
+                                    Produtos prontos para intermediação. Você ganha 35% em cada venda! | Entrega: 7-15 dias
                                 </div>
                             </div>
                         </>
@@ -273,10 +272,10 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                             <ShieldCheck size={20} color="#22c55e" />
                             <div>
                                 <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#22c55e' }}>
-                                    ✅ CATÁLOGO INTERNO
+                                    ✅ CATÁLOGO VERIFICADO
                                 </div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos prontos para venda imediata
+                                    Produtos confirmados para venda imediata
                                 </div>
                             </div>
                         </>
@@ -286,10 +285,10 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                             <BrainCircuit size={20} color="#ef4444" />
                             <div>
                                 <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#ef4444' }}>
-                                    🔍 PRODUTO NÃO ENCONTRADO
+                                    🔍 NENHUM MATCH ENCONTRADO
                                 </div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    A IA registrou esta busca para sourcing futuro
+                                    Tente outras palavras-chave (ex: camera, drone, fone, smart)
                                 </div>
                             </div>
                         </>
