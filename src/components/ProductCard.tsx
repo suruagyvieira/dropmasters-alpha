@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { ShoppingCart, Star, ExternalLink, Cpu, Clock } from 'lucide-react';
+import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 
@@ -16,9 +16,11 @@ interface ProductProps {
     is_digital?: boolean;
     profit_margin?: number;
     priority?: boolean;
+    location?: string;
+    is_local?: boolean;
 }
 
-const ProductCard = ({ id, name, price, original_price, image, category, affiliate_link, is_digital, profit_margin, priority }: ProductProps) => {
+const ProductCard = ({ id, name, price, original_price, image, category, affiliate_link, is_digital, profit_margin, priority, location, is_local }: ProductProps) => {
     const { addToCart } = useCart();
 
     const optimizedImage = image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop';
@@ -45,6 +47,20 @@ const ProductCard = ({ id, name, price, original_price, image, category, affilia
                     className="product-image"
                 />
                 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '6px', zIndex: 1 }}>
+                    {/* LOGISTICS BADGE: LOCAL SHIPPING */}
+                    {is_local && (
+                        <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', background: '#10b981', color: 'white', fontWeight: '800', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Truck size={12} /> ENVIO EXPRESSO
+                        </div>
+                    )}
+
+                    {/* LOGISTICS BADGE: LOCATION */}
+                    {location && !is_local && (
+                        <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '700', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0,0,0,0.6)' }}>
+                            <MapPin size={12} /> {location}
+                        </div>
+                    )}
+
                     {is_digital && (
                         <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', background: 'var(--accent)', color: 'white', fontWeight: '800', borderRadius: '8px' }}>
                             NEURAL CORE
@@ -114,7 +130,7 @@ const ProductCard = ({ id, name, price, original_price, image, category, affilia
                     </button>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

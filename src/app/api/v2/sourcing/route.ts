@@ -4,15 +4,14 @@ import { GLOBAL_PRODUCT_CATALOG, normalize } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * FLASH SOURCING API v2.1 - "INSTANT GLOBAL BRIDGE"
+ * FLASH SOURCING API v2.2 - "LOGISTICS INTELLIGENCE"
  * ═══════════════════════════════════════════════════════════════════════════════
- * Modelo: INTERMEDIADOR ÁGIL
- * - Busca instantânea em fornecedores globais (via LIB compartilhada)
- * - Retorna produtos prontos para venda IMEDIATA
- * - Produtos temporários (entram e saem do sistema)
- * - Foco: RENDIMENTO A CURTO PRAZO
+ * Modelo: INTERMEDIADOR ÁGIL + LOGÍSTICA DE PROXIMIDADE
+ * - Detecta região do usuário via IP (Vercel Headers)
+ * - Prioriza fornecedores LOCAIS para reduzir custo e tempo de envio
+ * - Retorna metadados logísticos
  * 
- * [ZERO STOCK] | [FLASH PRODUCTS] | [AUTO PAYOUT] | [INSTANT YIELD]
+ * [ZERO STOCK] | [SMART LOGISTICS] | [AUTO PAYOUT] | [INSTANT YIELD]
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -36,34 +35,40 @@ function generateProductImage(category: string): string {
     return images[category] || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
 }
 
-// Busca produtos que correspondem à query
-function searchProducts(query: string): any[] {
+// Busca produtos com inteligência logística
+function searchProducts(query: string, userRegion: string): any[] {
     const normalizedQuery = normalize(query);
     const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length > 2);
 
     if (queryWords.length === 0) return [];
 
-    // Pontua cada produto baseado em quantas keywords batem
+    // Pontuação: Keywords + Relevância + PROXIMIDADE
     const scored = GLOBAL_PRODUCT_CATALOG.map(product => {
         let score = 0;
         const productKeywords = product.keywords.map((k: string) => normalize(k));
 
+        // 1. Keyword matching
         for (const word of queryWords) {
             for (const keyword of productKeywords) {
                 if (keyword.includes(word) || word.includes(keyword)) {
                     score += 10;
                 }
             }
-            // Bonus se aparece no nome
             if (normalize(product.name).includes(word)) {
                 score += 5;
             }
         }
 
-        return { ...product, score };
+        // 2. Logistic Boost (Se fornecedor for da mesma região)
+        const isLocal = product.location === userRegion;
+        if (isLocal && score > 0) {
+            score += 20; // Super Boost para local
+        }
+
+        return { ...product, score, is_local: isLocal };
     });
 
-    // Filtra e ordena por relevância
+    // Filtra e ordena
     return scored
         .filter(p => p.score > 0)
         .sort((a, b) => b.score - a.score)
@@ -76,19 +81,25 @@ function searchProducts(query: string): any[] {
             original_price: p.original_price,
             category: p.category,
             supplier: p.supplier,
+            location: p.location, // Return location to UI
+            is_local: p.is_local, // Flag for UI badge
             image_url: generateProductImage(p.category),
             demand_score: 85 + Math.floor(Math.random() * 15),
             profit_margin: 35,
             is_flash: true,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h
+            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
             stock_model: 'ZERO_INVENTORY',
-            delivery_estimate: '7-15 dias úteis'
+            delivery_estimate: p.is_local ? '1-3 dias (Expresso)' : '7-15 dias (Nacional)'
         }));
 }
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q')?.trim();
+
+    // Vercel Geolocation Headers
+    const city = request.headers.get('x-vercel-ip-city') || 'São Paulo';
+    const region = request.headers.get('x-vercel-ip-country-region') || 'SP'; // Default SP for dev
 
     if (!query || query.length < 2) {
         return NextResponse.json({
@@ -100,15 +111,14 @@ export async function GET(request: Request) {
 
     const supabase = getSupabase();
 
-    // BUSCA INSTANTÂNEA nos fornecedores globais
-    const flashProducts = searchProducts(query);
+    // Busca com Inteligência Logística
+    const flashProducts = searchProducts(query, region);
 
     if (flashProducts.length > 0) {
-        // Log da oportunidade de venda (fire and forget)
         if (supabase) {
             void supabase.from('logs').insert({
-                type: 'flash_sourcing',
-                message: `⚡ FLASH: Busca "${query}" → ${flashProducts.length} produtos prontos para venda imediata.`,
+                type: 'flash_sourcing_logistics',
+                message: `🚚 LOGISTICS: Busca "${query}" (${city}-${region}) → ${flashProducts.length} produtos. Local Matches: ${flashProducts.filter(p => p.is_local).length}`,
                 created_at: new Date().toISOString()
             });
         }
@@ -117,7 +127,8 @@ export async function GET(request: Request) {
             products: flashProducts,
             count: flashProducts.length,
             source: 'flash_global',
-            message: `${flashProducts.length} produto(s) disponíveis para venda imediata`,
+            user_location: { city, region },
+            message: `${flashProducts.length} produto(s) encontrados. Priorizando fornecedores próximos de ${region}.`,
             expires_in: '24 horas'
         });
     }
@@ -126,7 +137,7 @@ export async function GET(request: Request) {
     if (supabase) {
         void supabase.from('logs').insert({
             type: 'demand_miss',
-            message: `🔍 DEMANDA: Busca "${query}" sem match. Oportunidade de sourcing.`,
+            message: `🔍 DEMANDA: Busca "${query}" sem match.`,
             created_at: new Date().toISOString()
         });
     }
@@ -135,6 +146,6 @@ export async function GET(request: Request) {
         products: [],
         count: 0,
         source: 'none',
-        message: `Nenhum produto encontrado para "${query}". Tente outras palavras-chave.`
+        message: `Nenhum produto encontrado para "${query}".`
     });
 }
