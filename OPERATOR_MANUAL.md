@@ -16,10 +16,14 @@ O lucro mora na demanda viral. Use o `MOCK_PRODUCTS` ou o banco do Supabase para
 - **IA Prediction**: O sistema marca automaticamente produtos com `demand_score > 90` como **VIRAIS**. Foque sua divulgação neles.
 - **Estoque Zero**: Não se preocupe com quantidade. Se o fornecedor tem, o sistema vende.
 
-## 💰 Passo 3: Estratégia de Rendimento (Pricing)
+## 💰 Passo 3: Estratégia de Rendimento (Pricing & Gateway)
 Você não precisa calcular lucro manualmente. A IA faz isso:
 - **Margem Automática**: O sistema aplica uma margem base de 35% + bônus de demanda.
-- **Bundle Logic**: Ofereça "Compre 2, Ganhe 10% de Desconto". O backend já está configurado para calcular isso no Checkout e incentivará o cliente a aumentar o ticket médio.
+- **Bundle Logic**: Ofereça "Compre 2, Ganhe 10% de Desconto". O backend já está configurado para calcular isso no Checkout.
+- **Ativação de Gateway Real**: O sistema já está preparado para receber pagamentos reais. Para ativar, basta adicionar estas variáveis na Vercel:
+  - `MERCADO_PAGO_ACCESS_TOKEN`: Seu token do Mercado Pago.
+  - `PAGSEGURO_TOKEN`: Seu token do PagSeguro.
+  *Se nenhum for preenchido, o sistema operará em **Modo Simulação Alpha**.*
 
 ## 📢 Passo 4: Tráfego e Conversão (Custo Zero)
 Para faturar hoje sem gastar em anúncios:

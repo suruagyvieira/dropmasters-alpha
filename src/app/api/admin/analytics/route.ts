@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
 import { isAdminAuthorized } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     if (!(await isAdminAuthorized())) {
         return NextResponse.json({ error: 'Unauthorized Access Denied' }, { status: 401 });
