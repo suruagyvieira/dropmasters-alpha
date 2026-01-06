@@ -1,118 +1,72 @@
-<<<<<<< HEAD
-# 🌌 DropMasters Sentient v9.9 - Serverless Infinity Edition
+# 🌌 Omni-Sentient Apex v12.1 - Automated Revenue Engine
 
-A evolução definitiva em e-commerce autônomo. Um ecossistema **vivo**, agora **100% Serverless**, projetado para rodar com **Custo Zero de Infraestrutura** e garantir lucros exponenciais desde o primeiro segundo.
-
----
-
-## ⚡ Serverless Core & Zero Cost (v9.9) - CRÍTICO!
-
-O sistema migrou para uma arquitetura híbrida de alta eficiência, eliminando a dependência de servidores VPS caros para a fase inicial:
-- **API Serverless Autocontida**: Todo o backend (Checkout, Produtos, Prova Social) agora vive dentro do Next.js Edge Runtime.
-- **Incremental Static Regeneration (ISR)**: Páginas de produto pré-renderizadas que atualizam sozinhas. Carregamento instantâneo.
-- **Build Blindado**: Sistema à prova de falhas de conexão (`ECONNREFUSED` resolvido), garantindo deployment contínuo na Vercel/Netlify.
-- **Battery Saver AI**: Otimização inteligente que pausa scripts pesados quando o cliente minimiza o site (Mobile Friendly).
+A evolução definitiva em e-commerce de intermediação. Um ecossistema **simbiótico**, projetado para rodar com **Custo Inicial Zero**, **Estoque Zero** e **Automação de Repasse** imediata.
 
 ---
 
-## 🤝 Affiliate Neural Bridge (v9.8)
+## ⚡ Performance Global & Custo Zero (Apex v12.1)
 
-O sistema permite escalar vendas através de um exército autônomo de parceiros:
-- **Painel de Afiliados Neural**: Visualização de métricas em tempo real (/afiliados).
-- **Rastreamento Automático**: Links `?ref=` atribuem comissões automaticamente.
-
----
-
-## ⚔️ Warcraft Competitive Intelligence
-
-O sistema monitora e reage à concorrência em tempo real:
-- **Predatory Pricing**: Ajuste automático de margens para dominar volume.
-- **Comparative Guerilla Marketing**: Copywriting agressivo automatizado.
+O sistema opera em uma arquitetura de alta eficiência, eliminando barreiras financeiras e técnicas:
+- **Dual-Hosting Apex**: Frontend na **Vercel** (Edge Speed) e Backend no **Render** (Python Intelligence).
+- **Zero Initial Cost**: Infraestrutura 100% gratuita nos tiers iniciais (Vercel, Render, Supabase).
+- **Estoque Zero Real**: Integração nativa com **Dropi & AliExpress** para logística direta.
+- **Latência Zero**: Otimização de busca e cache inteligente de 15 minutos para tráfego massivo.
 
 ---
 
-## 🚀 Built for Massive Profit (Apex Core v9.9)
+## 💰 Fintech & Arrecadação Automática
 
-### 🧠 Cérebro & IA
-- **Sentient Engine**: Lógica de humor e adaptação de vendas.
-- **Serverless Neural Database**: Dados de produtos e pedidos gerenciados em memória de alta performance (Mock Production-Ready).
-
-### 💰 Fintech & Automação de Repasse
-- **Flow de Pagamento Simulado e Convertido**: Funil completo de Checkout -> Pagamento -> Sucesso.
-- **Dropshipping Automático**: O endpoint `/api/v2/payments/callback` dispara a ordem de compra para o fornecedor ("Global Tech Suppliers") IMEDIATAMENTE após o pagamento. **Estoque Zero Real**.
+O foco é o dinheiro no seu bolso no menor tempo possível:
+- **PIX Direto (CPF)**: Chave `09311538400` integrada nativamente no checkout para liquidez imediata.
+- **Mercado Pago (Aurum Tech)**: Gateway oficial para Cartões e Boletos com repasse automatizado.
+- **Automação de Repasse**: Cálculo de custo e lucro (`platform_net`) processado no milissegundo do pagamento.
 
 ---
 
-## ✅ Auditoria de Comunicação (v9.9)
+## 🧠 Marketing Psicológico & Conversão (Neural Hooks)
+
+Gatilhos avançados para forçar a decisão de compra:
+- **Neural Scarcity Hook**: Contagem regressiva de estoque dinâmico (2 a 6 unidades) em tempo real.
+- **Regional Trust Signal**: Selo de "Envio Prioritário para SP/SC", aumentando a confiança regional.
+- **WhatsApp Predator v11.9**: Recuperação de carrinho em 3 níveis:
+    1. Amigável (Suporte)
+    2. Escassez (Urgência Regional)
+    3. ROI Hunter (Oferta Final/Cupom)
+
+---
+
+## 🛠️ Arquitetura Técnica Elite
+
+- **Frontend**: Next.js 16 (Turbopack Powered) + Vanilla CSS Premium.
+- **Backend**: Flask Apex (Python) com *Lazy Loading* para boot ultra-rápido.
+- **Database**: Supabase (PostgreSQL) com RLS (Row Level Security) blindado.
+- **Logística**: Blueprint de integração `render.yaml` para despacho via Dropi API.
+
+---
+
+## 🚀 Como Iniciar a Operação
+
+### 1. Backend (Render)
+1. Conecte o repositório ao Render.
+2. O sistema usará o `render.yaml` automaticamente.
+3. Configure as variáveis: `MERCADO_PAGO_ACCESS_TOKEN`, `SUPPLIER_API_KEY`, `SUPABASE_URL`.
+
+### 2. Frontend (Vercel)
+1. Importe a pasta `/frontend`.
+2. Configure `NEXT_PUBLIC_API_URL` com o link do seu backend no Render.
+3. Configure `NEXT_PUBLIC_PIX_KEY` com seu CPF/Chave.
+
+---
+
+## ✅ Auditoria de Sistema (v12.1)
 
 | Camada | Status | Detalhes |
 |--------|--------|----------|
-| Frontend → Internal API | ✅ OK | Zero Latency (Local/Edge) |
-| Build Process | ✅ OK | Resiliente a falhas de rede externa |
-| Battery/CPU Optim | ✅ OK | `document.hidden` throttle ativo |
-| Auto-Fulfillment | ✅ OK | Trigger automático pós-pagamento |
+| **Recebimento** | ✅ OK | PIX & Mercado Pago Ativos |
+| **Logística** | ✅ OK | Dropi Key: `DRKGcbNn2Y` |
+| **Conversão** | ✅ OK | Gatilhos de Escassez SP/SC |
+| **Segurança** | ✅ OK | RLS Supabase & Atomic Callbacks |
 
 ---
 
-## 🛠️ Roadmap Final
-
-- [x] **Serverless Migration**: Custo de infraestrutura zero.
-- [x] **Affiliate Neural Bridge**: Rede de afiliados autônoma.
-- [x] **Smart Inventory Predictor**: IA para prever viralização (Próximo).
-- [x] **VIP Customer Journey**: Fidelização agressiva.
-- [ ] **Traffic Injection**: Iniciar tráfego pago simulado para teste de carga.
-
----
-
-**DropMasters Sentient - O futuro é automático, sem servidores e sem limites.**
-=======
-# 🌌 DropMasters v10.6 - Neural Dropshipping Engine
-
-Plataforma de e-commerce de ultra-alta performance baseada em Next.js 16, otimizada para **Custo Zero**, **Estoque Zero** e **Rendimento Automático**.
-
-## 🚀 Diferenciais Alpha 2026
-
-- **Infraestrutura Serverless**: Custo inicial zero utilizando Next.js SSG/ISR.
-- **Neural Pricing**: Precificação dinâmica via IA que ajusta margens baseado em demanda.
-- **Automação de Repasse**: Sistema de checkout com lógica de proteção de lucro e repasse direto ao fornecedor.
-- **Performance Alpha**: 
-  - Renderização estática com regeneração incremental (ISR).
-  - Aceleração de animações por GPU.
-  - Otimização de imagens LCP inteligente.
-- **Global Reach**: Pronta para operações cross-border com baixa latência global.
-
-## 🛠️ Tecnologias de Elite
-
-- **Frontend**: React 19 + Next.js 16 (Turbopack Powered)
-- **Styling**: Vanilla CSS Premium (Glassmorphism & Cyberpunk Aesthetics)
-- **Database**: Supabase (Real-time & AI Analytics)
-- **Icons**: Lucide React
-- **Animations**: Framer Motion (Optimized)
-
-## 📦 Como Iniciar a Operação
-
-1. **Configuração de Variáveis**:
-   Crie um arquivo `.env.local` com suas credenciais do **Supabase** e **Secrets** de administração.
-
-2. **Instalação**:
-   ```bash
-   npm install
-   ```
-
-3. **Build de Produção (SSG)**:
-   ```bash
-   npm run build
-   ```
-
-4. **Modo Desenvolvimento**:
-   ```bash
-   npm run dev
-   ```
-
-## 💰 Modelo de Negócio
-
-Este sistema foi projetado para gerar **rendimento a curto prazo** sem a necessidade de investimentos pesados em infraestrutura. O foco é a venda de produtos virais com intermediação automática, onde a plataforma atua como o cérebro lógico e o fornecedor cuida da logística física (Estoque Zero).
-
----
-*Gerado e mantido por Antigravity AI - Advanced Agentic Coding.*
->>>>>>> origin/main
+**Omni-Sentient Apex - Menos conversa, mais faturamento. 🧬**
