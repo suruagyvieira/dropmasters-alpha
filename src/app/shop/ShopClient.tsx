@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
-import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign } from 'lucide-react';
+import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 import { Product } from '@/lib/products';
@@ -90,26 +90,58 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [searchSource, setSearchSource] = useState<'internal' | 'global_suppliers' | 'none' | null>(null);
+    const [searchMessage, setSearchMessage] = useState('');
 
-    // AI Neural Search Core: Debounce & Race-Condition Protection
+    // AI Neural Search Core: Debounce + Global Sourcing Fallback
     useEffect(() => {
         if (!mounted || !searchTerm) {
-            if (mounted && !searchTerm) setProducts(initialProducts);
+            if (mounted && !searchTerm) {
+                setProducts(initialProducts);
+                setSearchSource(null);
+                setSearchMessage('');
+            }
             return;
         }
 
         const delayDebounce = setTimeout(async () => {
             setIsSearching(true);
+            setSearchSource(null);
+            setSearchMessage('');
+
             try {
-                const url = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
-                const res = await fetchApi(url);
-                if (Array.isArray(res)) setProducts(res);
+                // FIRST: Try internal products API
+                const internalUrl = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
+                const internalRes = await fetchApi(internalUrl);
+
+                if (Array.isArray(internalRes) && internalRes.length > 0) {
+                    setProducts(internalRes);
+                    setSearchSource('internal');
+                    setSearchMessage(`${internalRes.length} produto(s) no catálogo`);
+                } else {
+                    // FALLBACK: Search global suppliers
+                    setSearchMessage('Buscando nos fornecedores globais...');
+
+                    const sourcingUrl = `/api/v2/sourcing?q=${encodeURIComponent(searchTerm)}`;
+                    const sourcingRes = await fetchApi(sourcingUrl);
+
+                    if (sourcingRes?.products && sourcingRes.products.length > 0) {
+                        setProducts(sourcingRes.products);
+                        setSearchSource('global_suppliers');
+                        setSearchMessage(`${sourcingRes.products.length} produto(s) de fornecedores globais`);
+                    } else {
+                        setProducts([]);
+                        setSearchSource('none');
+                        setSearchMessage(sourcingRes?.message || 'Nenhum produto encontrado');
+                    }
+                }
             } catch (err) {
                 console.error("Neural Search Error:", err);
+                setSearchMessage('Erro na busca. Tente novamente.');
             } finally {
                 setIsSearching(false);
             }
-        }, 500);
+        }, 600);
 
         return () => clearTimeout(delayDebounce);
     }, [searchTerm, mounted, initialProducts]);
@@ -196,10 +228,74 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 <div className="glass" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '10px', height: 'fit-content' }}>
                     <div className={isSearching ? "pulse-ai active" : "pulse-ai"} style={{ width: '8px', height: '8px' }}></div>
                     <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--secondary)' }}>
-                        {isSearching ? 'PROCESSANDO REDE...' : 'INTELIGÊNCIA: STANDBY'}
+                        {isSearching ? 'BUSCANDO...' : (searchMessage || 'INTELIGÊNCIA: STANDBY')}
                     </span>
                 </div>
             </div>
+
+            {/* SOURCE INDICATOR */}
+            {searchSource && searchTerm && !isSearching && (
+                <div
+                    className="glass animate-fade-in"
+                    style={{
+                        marginBottom: '2rem',
+                        padding: '1rem 1.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        background: searchSource === 'global_suppliers'
+                            ? 'rgba(139, 92, 246, 0.1)'
+                            : searchSource === 'internal'
+                                ? 'rgba(34, 197, 94, 0.1)'
+                                : 'rgba(239, 68, 68, 0.1)',
+                        borderColor: searchSource === 'global_suppliers'
+                            ? 'var(--primary)'
+                            : searchSource === 'internal'
+                                ? '#22c55e'
+                                : '#ef4444'
+                    }}
+                >
+                    {searchSource === 'global_suppliers' && (
+                        <>
+                            <Globe size={20} color="var(--primary)" />
+                            <div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)' }}>
+                                    🌍 FORNECEDORES GLOBAIS
+                                </div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                    Produtos encontrados na rede de suppliers. Entrega: 7-15 dias | Estoque Zero
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    {searchSource === 'internal' && (
+                        <>
+                            <ShieldCheck size={20} color="#22c55e" />
+                            <div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#22c55e' }}>
+                                    ✅ CATÁLOGO INTERNO
+                                </div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                    Produtos prontos para venda imediata
+                                </div>
+                            </div>
+                        </>
+                    )}
+                    {searchSource === 'none' && (
+                        <>
+                            <BrainCircuit size={20} color="#ef4444" />
+                            <div>
+                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#ef4444' }}>
+                                    🔍 PRODUTO NÃO ENCONTRADO
+                                </div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                                    A IA registrou esta busca para sourcing futuro
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
 
             {/* NEURAL CONCIERGE: BOTÃO FLUTUANTE DE ATENDIMENTO IA */}
             <div
