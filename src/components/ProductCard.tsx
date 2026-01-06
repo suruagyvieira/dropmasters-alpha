@@ -9,6 +9,7 @@ interface ProductProps {
     id: string;
     name: string;
     price: number;
+    description?: string;
     original_price?: number;
     image: string;
     category: string;
@@ -18,9 +19,10 @@ interface ProductProps {
     priority?: boolean;
     location?: string;
     is_local?: boolean;
+    metadata?: any;
 }
 
-const ProductCard = ({ id, name, price, original_price, image, category, affiliate_link, is_digital, profit_margin, priority, location, is_local }: ProductProps) => {
+const ProductCard = ({ id, name, price, description, original_price, image, category, affiliate_link, is_digital, profit_margin, priority, location, is_local, metadata }: ProductProps) => {
     const { addToCart } = useCart();
 
     const optimizedImage = image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop';

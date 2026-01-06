@@ -100,8 +100,10 @@ export default async function Home() {
                 id={product.id}
                 name={product.name}
                 price={product.price}
+                description={product.description}
                 category={product.category}
                 image={product.image_url || ''}
+                metadata={product.metadata}
                 priority={index < 2} // Performance: Prioritize loading the first 2 images
               />
             )) : (

@@ -17,6 +17,8 @@ export interface Product {
     profit_margin?: number;
     stock_model?: string;
     analysis?: any;
+    metadata?: any;
+    location?: string;
 }
 
 export const MOCK_PRODUCTS: Product[] = [
