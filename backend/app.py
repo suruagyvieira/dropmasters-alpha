@@ -6,22 +6,22 @@ import random
 import threading
 import uuid
 import datetime
+import requests
 from functools import wraps
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from supplier import Autopilot
-from support_engine import simulate_chat_interaction
-from whatsapp_automation import generate_payment_whatsapp_message, generate_shipping_whatsapp_message, simulate_whatsapp_dispatch, generate_recovery_whatsapp_message
-from competitive_engine import analyze_competitive_pressure, get_predatory_margin, generate_comparative_hook, calculate_scarcity_vibe
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# --- OMNI-SENTIENT CORE v11.4 (REGIONAL PERFORMANCE) ---
+# --- OMNI-SENTIENT CORE v11.7 (FINANCIAL PEAK) ---
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+MP_TOKEN = os.environ.get("MERCADO_PAGO_ACCESS_TOKEN") or os.environ.get("MP_ACCESS_TOKEN")
+PAG_TOKEN = os.environ.get("PAGSEGURO_TOKEN")
+FULFILLMENT_URL = os.environ.get("FULFILLMENT_WEBHOOK_URL")
 ADMIN_SECRET = os.environ.get("ADMIN_SECRET", "quantum-2026")
 
 supabase: Client = None
@@ -177,15 +177,25 @@ def get_products():
     
     try:
         res = supabase.table('products').select("*").eq('is_active', True).order('is_featured', desc=True).execute()
-        processed = [{
-            "id": p['id'], "name": p['name'], "price": float(p['price']),
-            "description": p.get('description', ''),
-            "image_url": p['image_url'], "stock": p.get('stock', 10),
-            "original_price": float(p['price'] * 2.1),
-            "location": (p.get('metadata') or {}).get('location', 'Global'),
-            "metadata": p.get('metadata', {}),
-            "ai_mood": AUTONOMY_STATE["ai_mood"]
-        } for p in res.data]
+        processed = []
+        for p in res.data:
+            price = float(p.get('price', 0))
+            # Garantia de Intermediador: Calcula margem mínima de 35% caso base_price falte
+            base_price = float(p.get('base_price') or (price * 0.65))
+            
+            processed.append({
+                "id": p['id'], 
+                "name": p['name'], 
+                "price": price,
+                "base_price": base_price,
+                "description": p.get('description', ''),
+                "image_url": p['image_url'], 
+                "stock": p.get('stock', 10),
+                "original_price": float(price * 2.1),
+                "location": (p.get('metadata') or {}).get('location', 'SP'),
+                "metadata": p.get('metadata', {}),
+                "ai_mood": AUTONOMY_STATE["ai_mood"]
+            })
         
         with autonomy_lock:
             cache["products"]["data"] = processed
@@ -196,40 +206,60 @@ def get_products():
 @app.route('/api/v2/payments/callback', methods=['POST'])
 def payment_callback():
     """Automação de Repasse & Logística Regional."""
+    from supplier import Autopilot
+    from whatsapp_automation import generate_payment_whatsapp_message, simulate_whatsapp_dispatch
+
     data = request.json
     txn_id = data.get('transaction_id')
     if data.get('status') == 'paid':
         try:
-            if supabase:
-                ord_res = supabase.table('orders').select("*").eq('transaction_id', txn_id).execute()
-                if ord_res.data:
-                    order = ord_res.data[0]
-                    metadata = order.get('metadata') or {}
-                    
-                    # 1. Registro Financeiro (Audit)
-                    vendor_split = metadata.get('vendor_payout', 0)
-                    profit = metadata.get('platform_net', 0)
-                    
-                    # 2. Atualização Atômica
-                    supabase.table('orders').update({
-                        'status': 'paid', 'paid_at': datetime.datetime.now().isoformat()
-                    }).eq('transaction_id', txn_id).execute()
-                    
-                    add_log(f"💰 PAYOUT: TX {txn_id} | Vendor R$ {vendor_split} | Profit R$ {profit}", "revenue")
+            if not supabase: return jsonify({"error": "DB disconnect"}), 500
+            
+            # Atomic selection to prevent race conditions during payout
+            ord_res = supabase.table('orders').select("*").eq('transaction_id', txn_id).execute()
+            if ord_res.data:
+                order = ord_res.data[0]
+                if order.get('status') == 'paid': 
+                    return jsonify({"status": "already_processed"})
 
-                    # 3. Despacho Regional Prioritário
-                    def _finalize():
-                        Autopilot.submit_order(order)
-                        phone = order.get('phone')
-                        if phone:
-                            msg = generate_payment_whatsapp_message(txn_id, "Item Prioritário", float(order.get('total', 0)))
-                            simulate_whatsapp_dispatch(phone, msg)
-                    threading.Thread(target=_finalize, daemon=True).start()
+                metadata = order.get('metadata') or {}
+                vendor_split = metadata.get('vendor_payout', 0)
+                profit = metadata.get('platform_net', 0)
+                
+                # State Update First (Security Guard)
+                supabase.table('orders').update({
+                    'status': 'paid', 'paid_at': datetime.datetime.now().isoformat()
+                }).eq('transaction_id', txn_id).execute()
+                
+                add_log(f"💰 PAYOUT: TX {txn_id} | Vendor R$ {vendor_split} | Profit R$ {profit}", "revenue")
+
+                def _finalize(target_order, target_txn, target_split):
+                    # Autopilot Interno
+                    Autopilot.submit_order(target_order)
                     
-                    with autonomy_lock:
-                        AUTONOMY_STATE["conversion_count"] += 1
+                    if FULFILLMENT_URL:
+                        try:
+                            requests.post(FULFILLMENT_URL, json={
+                                "event": "order_paid",
+                                "transaction_id": target_txn,
+                                "payout": target_split,
+                                "items": target_order.get('items', [])
+                            }, timeout=10)
+                        except: pass
+
+                    phone = target_order.get('phone')
+                    if phone:
+                        msg = generate_payment_whatsapp_message(target_txn, "Item Prioritário", float(target_order.get('total', 0)))
+                        simulate_whatsapp_dispatch(phone, msg)
+                
+                # Offload to worker thread for high-concurrency safety
+                threading.Thread(target=_finalize, args=(order, txn_id, vendor_split), daemon=True).start()
+                
+                with autonomy_lock:
+                    AUTONOMY_STATE["conversion_count"] += 1
                 return jsonify({"status": "processed"})
-        except: pass
+        except Exception as e:
+            add_log(f"Callback Error: {str(e)}", "error")
     return jsonify({"status": "ignored"}), 200
 
 @app.route('/api/v2/support/chat', methods=['POST'])

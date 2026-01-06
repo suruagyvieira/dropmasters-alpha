@@ -22,23 +22,33 @@ def generate_payment_whatsapp_message(order_id, product_name, total_amount):
         "Te enviaremos o rastreio em breve! 🛰️"
     )
 
-def generate_recovery_whatsapp_message(customer_name, cart_link, product_name):
+def generate_recovery_whatsapp_message(customer_name, cart_link, product_name, level=1, location="SP"):
     """
     RECUPERAÇÃO DE CARRINHO (Revenue Generation Trigger):
-    Mensagem de alta conversão para clientes que não finalizaram o checkout.
+    Nível 1: Suporte Amigo
+    Nível 2: Escassez Regional
+    Nível 3: Oferta Final (ROI Hunter)
     """
-    hooks = [
-        f"Ei {customer_name}, vi que você deixou o seu *{product_name}* reservado, mas não finalizou. Restam apenas 3 unidades no Hub local! 🔥",
-        f"Olá {customer_name}! O Sentient Engine liberou um Frete Grátis relâmpago para o seu *{product_name}* por 20 minutos. Aproveita! 🚚",
-        f"Notamos uma instabilidade no seu checkout, {customer_name}. Sua unidade do *{product_name}* está salva aqui, mas por pouco tempo. ⏳"
-    ]
-    
-    return (
-        f"⚠️ *OPORTUNIDADE PENDENTE*\n\n"
-        f"{random.choice(hooks)}\n\n"
-        f"🔗 Clique aqui para concluir agora:\n{cart_link}\n\n"
-        "Se tiver qualquer dúvida, é só me chamar aqui! 🤖"
-    )
+    if level == 1:
+        return (
+            f"Olá *{customer_name}*! Vi aqui que seu pedido do *{product_name}* não foi finalizado. 🧐\n\n"
+            "Houve algum problema com o pagamento ou alguma dúvida sobre o frete? Como sou seu consultor pessoal, consigo te ajudar a liberar o envio ainda hoje! 🚀\n\n"
+            f"🔗 Concluir pedido:\n{cart_link}"
+        )
+    elif level == 2:
+        units = random.randint(2, 4)
+        return (
+            f"Oi *{customer_name}*, aviso importante! ⚠️\n\n"
+            f"Devido à alta demanda do *{product_name}* em *{location}*, nosso estoque está quase zerado (apenas {units} unidades).\n\n"
+            "Como você já tinha mostrado interesse, reservei sua unidade por mais 1 hora. Quer garantir agora? 👇\n\n"
+            f"🔗 Link de Reserva:\n{cart_link}"
+        )
+    else:
+        return (
+            f"Finalizando os despachos de hoje, *{customer_name}*! 📦\n\n"
+            f"Localizei seu pedido pendente e consegui uma liberação especial: se fechar o *{product_name}* nos próximos 15min, libero um *BÔNUS EXCLUSIVO* ou Frete VIP.\n\n"
+            "Posso validar seu benefício agora? Me responde com 'SIM'!"
+        )
 
 def generate_shipping_whatsapp_message(order_id, product_name, tracking_code):
     """
