@@ -14,7 +14,9 @@ services:
       - key: NEXT_PUBLIC_PIX_KEY
         value: 09311538400
       - key: FULFILLMENT_WEBHOOK_URL
-        sync: false
+        value: https://api.dropi.co/v1/webhook/orders?key=DRKGcbNn2Y
+      - key: SUPPLIER_API_KEY
+        value: DRKGcbNn2Y
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
