@@ -43,7 +43,7 @@ export default function CartPage() {
                 method: 'POST',
                 body: JSON.stringify({
                     method: paymentMethod,
-                    items: cart.map(i => ({ id: i.id, quantity: i.quantity })),
+                    items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price, name: i.name })),
                     user_id: user?.id || null,
                     email: user?.email || "convidado@dropmasters.com",
                     phone: phone,

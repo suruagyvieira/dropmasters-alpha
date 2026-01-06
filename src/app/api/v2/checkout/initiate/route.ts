@@ -31,21 +31,30 @@ export async function POST(request: Request) {
 
         // PRICE VALIDATION (Fetch real prices to prevent frontend manipulation)
         const productIds = items.map((i: any) => i.id);
-        const { data: realProducts, error: priceError } = await supabase
+        const { data: realProducts } = await supabase
             .from('products')
             .select('id, price')
             .in('id', productIds);
 
-        if (priceError) {
-            console.error('[CHECKOUT] Price fetch error:', priceError);
-            return NextResponse.json({ error: 'Failed to validate prices' }, { status: 500 });
-        }
-
-        // TOTAL CALCULATION (Using DB prices, not frontend)
+        // TOTAL CALCULATION 
+        // For internal products: Use DB price (security)
+        // For sourced products (sup_*): Use frontend price (they're not in DB)
         const total = items.reduce((acc: number, item: any) => {
             const dbProduct = realProducts?.find(p => p.id === item.id);
-            const realPrice = dbProduct ? Number(dbProduct.price) : 99.90;
-            const quantity = Math.max(1, Math.min(10, Number(item.quantity) || 1)); // Cap quantity 1-10
+
+            let realPrice: number;
+            if (dbProduct) {
+                // Internal product - use DB price for security
+                realPrice = Number(dbProduct.price);
+            } else if (item.id.startsWith('sup_')) {
+                // Sourced product - use frontend price (validated by sourcing API)
+                realPrice = Number(item.price) || 99.90;
+            } else {
+                // Unknown product - default price
+                realPrice = 99.90;
+            }
+
+            const quantity = Math.max(1, Math.min(10, Number(item.quantity) || 1));
             const itemPrice = quantity >= 2 ? realPrice * 0.9 : realPrice; // 10% bundle discount
             return acc + (quantity * itemPrice);
         }, 0);
