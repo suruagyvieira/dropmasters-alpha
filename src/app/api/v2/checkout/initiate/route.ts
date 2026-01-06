@@ -4,9 +4,9 @@ import { findGlobalProductByName } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * CHECKOUT API v9.1 - "SECURE REVENUE ENGINE"
+ * CHECKOUT API v9.2 - "HIGH PERFORMANCE REVENUE ENGINE"
  * ═══════════════════════════════════════════════════════════════════════════════
- * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SECURE VALIDATION]
+ * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SECURE & FAST CHECKOUT]
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -15,12 +15,12 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { method, items, user_id, email, phone, affiliate_code } = body;
 
-        // INPUT VALIDATION (Prevent bad requests early)
+        // INPUT VALIDATION
         if (!items || !Array.isArray(items) || items.length === 0) {
             return NextResponse.json({ error: 'Invalid items' }, { status: 400 });
         }
 
-        // GATEWAY TOKENS (Keep Existing ENV Variables)
+        // GATEWAY TOKENS
         const MP_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
         const PS_TOKEN = process.env.PAGSEGURO_TOKEN;
         const IS_REAL_GATEWAY = !!(MP_TOKEN || PS_TOKEN);
@@ -31,15 +31,25 @@ export async function POST(request: Request) {
         }
 
         // PRICE VALIDATION (Fetch real prices to prevent frontend manipulation)
-        const productIds = items.map((i: any) => i.id);
-        const { data: realProducts } = await supabase
-            .from('products')
-            .select('id, price')
-            .in('id', productIds);
+        // OPTIMIZATION: Only query DB for internal products (Cost Zero & Performance)
+        const internalIds = items
+            .filter((i: any) => !i.id.startsWith('sup_') && !i.id.startsWith('flash_'))
+            .map((i: any) => i.id);
+
+        let realProducts: any[] = [];
+
+        // Critical Perf: Avoid DB roundtrip if not needed
+        if (internalIds.length > 0) {
+            const { data } = await supabase
+                .from('products')
+                .select('id, price')
+                .in('id', internalIds);
+            realProducts = data || [];
+        }
 
         // TOTAL CALCULATION - SECURE VALIDATION
         const total = items.reduce((acc: number, item: any) => {
-            const dbProduct = realProducts?.find(p => p.id === item.id);
+            const dbProduct = realProducts.find((p: any) => p.id === item.id);
 
             let realPrice: number;
             if (dbProduct) {
@@ -53,7 +63,8 @@ export async function POST(request: Request) {
                         const timestamp = Number(parts[1]);
                         // 24 hours = 86400000 ms expiration window
                         if (!isNaN(timestamp) && (Date.now() - timestamp > 86400000)) {
-                            throw new Error(`Oferta Flash expirada: ${item.name}.`);
+                            // Throwing error inside reduce is caught by outer try/catch
+                            throw new Error(`Oferta Flash expirada para o produto: ${item.name}. Busque novamente.`);
                         }
                     }
                 }
@@ -64,7 +75,7 @@ export async function POST(request: Request) {
                     realPrice = globalProduct.price; // Use Trustworthy Catalog Price
                 } else {
                     console.warn(`[CHECKOUT] Unverified sourced product price used: ${item.name}`);
-                    realPrice = Number(item.price) || 99.90; // Fallback (Risk accepted for agility)
+                    realPrice = Number(item.price) || 99.90; // Fallback
                 }
             } else {
                 realPrice = 99.90;
@@ -140,6 +151,8 @@ export async function POST(request: Request) {
 
     } catch (e: any) {
         console.error('[CHECKOUT] Critical error:', e.message);
-        return NextResponse.json({ error: 'Checkout failed' }, { status: 500 });
+        // Retorna erro específico se for expiração, 500 se for outro
+        const status = e.message.includes('expirada') ? 400 : 500;
+        return NextResponse.json({ error: e.message || 'Checkout failed' }, { status });
     }
 }
