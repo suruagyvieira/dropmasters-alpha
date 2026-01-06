@@ -96,10 +96,19 @@ export async function POST(request: Request) {
         }, 0);
 
         // PAYOUT CALCULATION (Zero Stock Model)
-        const vendorSplit = Number((total * 0.65).toFixed(2)); // 65% to supplier
-        const platformProfit = Number((total * 0.35).toFixed(2)); // 35% net profit
-        const affiliateCommission = affiliate_code ? Number((platformProfit * 0.20).toFixed(2)) : 0;
-        const finalProfit = Number((platformProfit - affiliateCommission).toFixed(2));
+        // PAYOUT CALCULATION (Zero Stock Model - Dynamic Yield)
+        // Optimization: Local suppliers have lower shipping costs, increasing our margin to 40%.
+        const estimatedVendorCost = items.reduce((acc: number, item: any) => {
+            const itemTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+            // If location is specific (e.g. SP, SC) -> 60% cost. Global -> 68% cost.
+            const costRatio = (item.location && item.location.length === 2) ? 0.60 : 0.68;
+            return acc + (itemTotal * costRatio);
+        }, 0);
+
+        const vendorSplit = Number(estimatedVendorCost.toFixed(2)); // To Supplier
+        const platformProfit = Number((total - vendorSplit).toFixed(2)); // Net Profit
+        const affiliateCommission = affiliate_code ? Number((platformProfit * 0.20).toFixed(2)) : 0; // 20% of Net
+        const finalProfit = Number((platformProfit - affiliateCommission).toFixed(2)); // Final Platform Earnings
 
         // TRANSACTION ID (Unique, trackable)
         const transactionId = `tx_${Date.now()}_${Math.random().toString(36).substr(2, 6).toUpperCase()}`;

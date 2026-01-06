@@ -93,10 +93,17 @@ export function normalize(text: string): string {
         .trim();
 }
 
+// O(1) Performance Optimization: Create a Hash Map for instant lookups
+// This prevents iterating through the entire array during high-traffic checkout
+const CATALOG_INDEX = new Map<string, GlobalProduct>();
+GLOBAL_PRODUCT_CATALOG.forEach(product => {
+    CATALOG_INDEX.set(product.name, product);
+});
+
 /**
  * Busca produtos no catálogo global.
- * Útil para o backend (checkout) validar preços.
+ * O(1) Lookup complexity - Critical for scaling.
  */
 export function findGlobalProductByName(name: string): GlobalProduct | undefined {
-    return GLOBAL_PRODUCT_CATALOG.find(p => p.name === name);
+    return CATALOG_INDEX.get(name);
 }
