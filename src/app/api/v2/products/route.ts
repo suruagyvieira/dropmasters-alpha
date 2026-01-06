@@ -1,25 +1,30 @@
 import { NextResponse } from 'next/server';
 import { SmartInventoryPredictor } from '@/lib/predictor';
 import { getSupabase } from '@/lib/supabase';
-import { MOCK_PRODUCTS } from '@/lib/products';
+import { MOCK_PRODUCTS, Product } from '@/lib/products';
 
-// 1. AUTO-SEED LOGIC: Cache local para garantir custo zero de consultas repetitivas
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * PRODUCTS API v9.0 - "QUANTUM CATALOG"
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SHORT-TERM YIELD]
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+// Performance: Cache de seed para evitar upserts repetitivos
+let seedPromise: Promise<void> | null = null;
 let isSeeded = false;
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const limit = searchParams.get('limit');
-    const search = searchParams.get('search');
-    const supabase = getSupabase();
+// Non-blocking seed function
+async function ensureSeeded(): Promise<void> {
+    if (isSeeded) return;
+    if (seedPromise) return seedPromise;
 
-    if (!supabase) {
-        // Fallback to MOCK_PRODUCTS if DB is not ready - "Custo Zero" uptime
-        return NextResponse.json(MOCK_PRODUCTS.slice(0, Number(limit) || 20));
-    }
+    seedPromise = (async () => {
+        const supabase = getSupabase();
+        if (!supabase) return;
 
-    try {
-        // AUTO-SEED: Otimizado com UPSERT para evitar erros de duplicidade (Logical Fix)
-        if (!isSeeded) {
+        try {
             const seedData = MOCK_PRODUCTS.map(p => ({
                 id: p.id,
                 name: p.name,
@@ -32,55 +37,94 @@ export async function GET(request: Request) {
                 original_price: p.original_price || p.price * 1.5
             }));
 
-            // Upsert garante que se o ID já existir, apenas atualize ou ignore, sem quebrar o build/request
-            await supabase.from('products').upsert(seedData, { onConflict: 'id' });
+            await supabase.from('products').upsert(seedData, { onConflict: 'id', ignoreDuplicates: true });
             isSeeded = true;
+        } catch (err) {
+            console.warn('[SEED] Non-critical seed error:', err);
+            // Don't block request if seed fails - use mock data fallback
+        } finally {
+            seedPromise = null;
         }
+    })();
 
-        // 2. BUSCA AUTOMATIZADA - Performance: Select only needed columns
-        let query = supabase.from('products').select('id, name, price, description, category, image_url, demand_score, is_viral, original_price');
+    return seedPromise;
+}
 
-        if (search) {
-            query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get('limit');
+    const search = searchParams.get('search')?.trim();
+    const limit = limitParam ? Math.min(Number(limitParam), 50) : 20; // Cap at 50 for performance
+
+    const supabase = getSupabase();
+
+    // Fallback to MOCK_PRODUCTS if DB is not ready - "Custo Zero" uptime
+    if (!supabase) {
+        const mockAnalyzed = MOCK_PRODUCTS.slice(0, limit).map(p => ({
+            ...SmartInventoryPredictor.analyze(p),
+            estimated_profit: Number((p.price * 0.45).toFixed(2))
+        }));
+        return NextResponse.json(mockAnalyzed);
+    }
+
+    try {
+        // Non-blocking seed (doesn't delay response)
+        ensureSeeded();
+
+        // OPTIMIZED QUERY: Select only needed columns, add limit
+        let query = supabase
+            .from('products')
+            .select('id, name, price, description, category, image_url, demand_score, is_viral, original_price')
+            .eq('is_active', true)
+            .limit(limit);
+
+        // Search with sanitized input
+        if (search && search.length >= 2) {
+            const sanitized = search.replace(/[%_]/g, ''); // Prevent SQL pattern injection
+            query = query.or(`name.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
         }
 
         const { data: products, error: queryError } = await query;
-        if (queryError) throw queryError;
 
-        // 3. LOG DE DEMANDA (Automação de Repasse de Interesse) - Melhoria Crítica
+        if (queryError) {
+            console.error('[PRODUCTS] Query error:', queryError);
+            throw queryError;
+        }
+
+        // LOG DE DEMANDA (Non-blocking - Fire and forget)
         if (search && (!products || products.length === 0)) {
-            await supabase.from('logs').insert({
+            void supabase.from('logs').insert({
                 type: 'demand_miss',
-                message: `AUTOMAÇÃO 2026: Sourcing imediato necessário para "${search}". Interesse detectado sem oferta correspondente.`,
+                message: `🔍 OPORTUNIDADE: Busca sem resultado para "${search}". Considerar sourcing.`,
                 created_at: new Date().toISOString()
             });
         }
 
-        // 4. CAMADA DE INTELIGÊNCIA (ANÁLISE PREDITIVA) - Otimizada
-        const analyzedProducts = (products || []).map(product => {
-            const analyzed = SmartInventoryPredictor.analyze(product) as any;
 
-            // Margem Inteligente: Custo Zero de Estoque permite margens agressivas
-            const baseMargin = 0.45; // 45% de margem padrão dropshipping premium
-            analyzed.estimated_profit = Number((product.price * baseMargin).toFixed(2));
-
-            return analyzed;
+        // CAMADA DE INTELIGÊNCIA (ANÁLISE PREDITIVA)
+        const analyzedProducts = (products || []).map((product: Product) => {
+            const analyzed = SmartInventoryPredictor.analyze(product);
+            return {
+                ...analyzed,
+                estimated_profit: Number((product.price * 0.45).toFixed(2)) // 45% margin
+            };
         });
 
-        // Configuração de Cache para Performance (Vercel Edge Network)
-        const response = NextResponse.json(
-            limit ? analyzedProducts.slice(0, Number(limit)) : analyzedProducts,
-            {
-                headers: {
-                    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
-                },
-            }
-        );
-
-        return response;
+        // Response with Edge Cache headers
+        return NextResponse.json(analyzedProducts, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+            },
+        });
 
     } catch (e: any) {
-        console.error('API Products Error:', e);
-        return NextResponse.json({ error: 'Quantum Sync Failure' }, { status: 500 });
+        console.error('[PRODUCTS] Critical error:', e.message);
+        // Graceful degradation: Return mock data on error
+        const fallback = MOCK_PRODUCTS.slice(0, limit).map(p => ({
+            ...SmartInventoryPredictor.analyze(p),
+            estimated_profit: Number((p.price * 0.45).toFixed(2))
+        }));
+        return NextResponse.json(fallback);
     }
 }
+
