@@ -4,7 +4,7 @@ import { findGlobalProductByName } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * CHECKOUT API v9.2 - "HIGH PERFORMANCE REVENUE ENGINE"
+ * CHECKOUT API v9.3 - "LOGISTIC PAYOUT ENGINE"
  * ═══════════════════════════════════════════════════════════════════════════════
  * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SECURE & FAST CHECKOUT]
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
             realProducts = data || [];
         }
 
-        // TOTAL CALCULATION - SECURE VALIDATION
+        // TOTAL CALCULATION - SECURE VALIDATION & LOGISTIC ENRICHMENT
         const total = items.reduce((acc: number, item: any) => {
             const dbProduct = realProducts.find((p: any) => p.id === item.id);
 
@@ -73,9 +73,18 @@ export async function POST(request: Request) {
 
                 if (globalProduct) {
                     realPrice = globalProduct.price; // Use Trustworthy Catalog Price
+
+                    // CRITICAL: Enrich Order with Logistic Data for Automated Payouts
+                    // Stores exactly which supplier/location fulfilled this order
+                    item.supplier = globalProduct.supplier;
+                    item.location = globalProduct.location;
+                    item.fulfillment_type = globalProduct.location ? `local_hub_${globalProduct.location}` : 'global_center';
+
                 } else {
                     console.warn(`[CHECKOUT] Unverified sourced product price used: ${item.name}`);
                     realPrice = Number(item.price) || 99.90; // Fallback
+                    item.supplier = 'Unknown_Sourcing';
+                    item.location = 'Global';
                 }
             } else {
                 realPrice = 99.90;
@@ -102,7 +111,7 @@ export async function POST(request: Request) {
             email: email || null,
             phone: phone || null,
             total: total,
-            items: items,
+            items: items, // Now contains enriched logistics data (supplier, location)
             status: 'pending',
             affiliate_ref: affiliate_code || null,
             payment_method: method || 'pix',
@@ -119,7 +128,7 @@ export async function POST(request: Request) {
 
         const logData = {
             type: 'payout_automation',
-            message: `💰 CHECKOUT: R$ ${total.toFixed(2)} | Lucro: R$ ${finalProfit} | Fornecedor: R$ ${vendorSplit} | Gateway: ${IS_REAL_GATEWAY ? 'REAL' : 'SIMULADO'}`,
+            message: `💰 CHECKOUT: R$ ${total.toFixed(2)} | Lucro: R$ ${finalProfit} | Fornecedor: R$ ${vendorSplit} [${items.map((i: any) => i.location || '?').join(',')}] | Gateway: ${IS_REAL_GATEWAY ? 'REAL' : 'SIMULADO'}`,
             created_at: new Date().toISOString()
         };
 
