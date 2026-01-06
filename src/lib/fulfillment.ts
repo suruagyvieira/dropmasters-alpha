@@ -1,66 +1,118 @@
 import { getSupabase } from './supabase';
 
-export interface FulfillmentOrder {
-    order_id: string;
-    items: any[];
-    customer: {
-        email: string;
-        phone?: string;
-        name?: string;
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * FULFILLMENT ENGINE v9.0 - "NEURAL BRIDGE"
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * Core Principles:
+ *   [ZERO STOCK]      → Não há inventário físico. O produto vai direto do fornecedor ao cliente.
+ *   [AUTO PAYOUT]     → Cálculo automático de repasse (65% fornecedor / 35% lucro).
+ *   [COST ZERO]       → Sem infraestrutura extra. Serverless puro.
+ *   [SHORT-TERM YIELD]→ Otimizado para gerar receita imediata.
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+
+export interface FulfillmentPayload {
+    version: string;
+    timestamp: string;
+    order_data: {
+        id: string;
+        total: number;
+        items: any[];
+        payout_split: number;
+        net_profit: number;
+        shipping: any;
+        customer: {
+            email: string;
+            phone?: string;
+        };
     };
-    total: number;
+    strategy: string;
 }
+
+// Performance: Timeout padrão para conexões externas (evita custo de função travada)
+const WEBHOOK_TIMEOUT_MS = 6000;
 
 export class FulfillmentEngine {
     /**
-     * BRAIN-CENTRAL: Fulfillment Engine 2026
-     * Optimized for: [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO]
+     * Processa o fulfillment de uma ordem paga.
+     * Idempotente: Não processa a mesma ordem duas vezes.
      */
-    static async process(transaction_id: string) {
+    static async process(transaction_id: string): Promise<boolean> {
+        // LAZY INIT: Só conecta ao Supabase se necessário
         const supabase = getSupabase();
-        if (!supabase) return false;
+        if (!supabase) {
+            console.warn('[BRIDGE] Supabase offline. Fulfillment skipped.');
+            return false;
+        }
+
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
         try {
-            // 1. DATA ACQUISITION & VALIDATION (Performance: Single Row Fetch)
+            // ─────────────────────────────────────────────────────────────────
+            // 1. DATA ACQUISITION (Performance: Select only needed columns)
+            // ─────────────────────────────────────────────────────────────────
             const { data: order, error } = await supabase
                 .from('orders')
-                .select('*')
+                .select('id, transaction_id, total, items, email, phone, status, metadata')
                 .eq('transaction_id', transaction_id)
                 .single();
 
             if (error || !order) {
-                console.error('Order missing for bridge process:', transaction_id);
+                console.error(`[BRIDGE] Order not found: ${transaction_id}`);
                 return false;
             }
 
-            // CRITICAL LOGICAL FIX: Prevenção de dupla execução / Fulfillment Idempotency
-            if (order.status !== 'paid' || order.metadata?.fulfillment_triggered === true) {
-                console.log(`[BRIDGE] Skip: Order ${transaction_id} not eligible or already triggered.`);
-                return true;
+            // ─────────────────────────────────────────────────────────────────
+            // 2. IDEMPOTENCY GUARD (Critical Logical Fix)
+            //    Previne dupla execução em cenários de retry/webhook duplicado.
+            // ─────────────────────────────────────────────────────────────────
+            if (order.status !== 'paid') {
+                console.log(`[BRIDGE] Order ${transaction_id} not paid yet. Skipping.`);
+                return false;
+            }
+            if (order.metadata?.fulfillment_triggered === true) {
+                console.log(`[BRIDGE] Order ${transaction_id} already processed. Idempotent skip.`);
+                return true; // Retorna true pois não é um erro, apenas já foi feito.
             }
 
-            // 2. WEBHOOK CONFIGURATION (Keep Existing ENV Variables)
-            const WEBHOOK_URL = process.env.FULFILLMENT_WEBHOOK_URL;
+            // ─────────────────────────────────────────────────────────────────
+            // 3. PROFIT CALCULATION (Zero Stock Model)
+            //    Lucro líquido = 35% do total. Repasse ao fornecedor = 65%.
+            // ─────────────────────────────────────────────────────────────────
+            const vendorPayout = order.metadata?.vendor_payout ?? Number((order.total * 0.65).toFixed(2));
+            const netProfit = Number((order.total - vendorPayout).toFixed(2));
 
-            const payload = {
-                version: 'v8.9-sentient',
+            // ─────────────────────────────────────────────────────────────────
+            // 4. BUILD PAYLOAD (Estrutura para Webhook Externo)
+            // ─────────────────────────────────────────────────────────────────
+            const payload: FulfillmentPayload = {
+                version: 'v9.0-neural-bridge',
                 timestamp: new Date().toISOString(),
                 order_data: {
                     id: order.transaction_id,
                     total: order.total,
                     items: order.items,
-                    payout_split: order.metadata?.vendor_payout,
-                    shipping: order.metadata?.shipping_address || 'pendente_preenchimento'
+                    payout_split: vendorPayout,
+                    net_profit: netProfit,
+                    shipping: order.metadata?.shipping_address || null,
+                    customer: {
+                        email: order.email,
+                        phone: order.phone
+                    }
                 },
                 strategy: 'zero_inventory_autodispatch'
             };
 
-            // 3. PERFORMANCE OPTIMIZATION: Fetch with Timeout & AbortController
-            // Evita que a Serverless Function gaste tempo (e custo) travada em conexões lentas
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos de limite
+            // ─────────────────────────────────────────────────────────────────
+            // 5. WEBHOOK DISPATCH (Com Timeout para Performance)
+            // ─────────────────────────────────────────────────────────────────
+            const WEBHOOK_URL = process.env.FULFILLMENT_WEBHOOK_URL;
 
             if (WEBHOOK_URL) {
+                const controller = new AbortController();
+                timeoutId = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
+
                 try {
                     const response = await fetch(WEBHOOK_URL, {
                         method: 'POST',
@@ -68,41 +120,55 @@ export class FulfillmentEngine {
                         body: JSON.stringify(payload),
                         signal: controller.signal
                     });
-                    clearTimeout(timeoutId);
+
+                    if (timeoutId) clearTimeout(timeoutId);
 
                     if (response.ok) {
-                        // Atualiza a ordem marcando o disparo de automação para segurança
+                        // Marca como processado para idempotência
                         await supabase.from('orders').update({
-                            metadata: { ...order.metadata, fulfillment_triggered: true }
+                            metadata: { ...order.metadata, fulfillment_triggered: true, dispatched_at: new Date().toISOString() }
                         }).eq('id', order.id);
 
                         await supabase.from('logs').insert({
                             type: 'system',
-                            message: `🔥 AUTOMAÇÃO REAL: Pedido ${transaction_id} enviado ao braço logístico.`,
+                            message: `🚀 FULFILLMENT REAL: Pedido ${transaction_id} despachado. Lucro: R$ ${netProfit}.`,
                             created_at: new Date().toISOString()
                         });
                         return true;
+                    } else {
+                        console.error(`[BRIDGE] Webhook failed with status: ${response.status}`);
                     }
-                } catch (webhookErr: any) {
-                    if (webhookErr.name === 'AbortError') {
-                        console.error('Fulfillment Webhook Timeout');
+                } catch (fetchErr: any) {
+                    if (timeoutId) clearTimeout(timeoutId);
+                    if (fetchErr.name === 'AbortError') {
+                        console.error('[BRIDGE] Webhook timeout exceeded.');
+                    } else {
+                        console.error('[BRIDGE] Webhook fetch error:', fetchErr.message);
                     }
-                    console.error('Bridge Connection Error:', webhookErr);
                 }
             }
 
-            // 4. FALLBACK LOGIC (Zero Stock Mode)
-            // Caso não haja webhook, o sistema mantém o repasse em segurança no dashboard admin
+            // ─────────────────────────────────────────────────────────────────
+            // 6. FALLBACK: MANUAL QUEUE (Custo Zero)
+            //    Se não há webhook ou ele falhou, registra para processamento manual.
+            // ─────────────────────────────────────────────────────────────────
+            await supabase.from('orders').update({
+                metadata: { ...order.metadata, awaiting_manual_fulfillment: true }
+            }).eq('id', order.id);
+
             await supabase.from('logs').insert({
                 type: 'system',
-                message: `🤖 VIRTUAL DISPATCH: Pedido ${transaction_id} agendado para processamento manual (Autônomo).`,
+                message: `📦 FILA MANUAL: Pedido ${transaction_id} aguardando despacho. Lucro potencial: R$ ${netProfit}.`,
                 created_at: new Date().toISOString()
             });
 
             return true;
-        } catch (e) {
-            console.error('Fulfillment Logic Failure:', e);
+
+        } catch (e: any) {
+            if (timeoutId) clearTimeout(timeoutId);
+            console.error('[BRIDGE] Critical failure:', e.message);
             return false;
         }
     }
 }
+
