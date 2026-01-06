@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/lib/supabase';
+import { findGlobalProductByName } from '@/lib/globalCatalog';
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * CHECKOUT API v9.0 - "REVENUE ENGINE"
+ * CHECKOUT API v9.1 - "SECURE REVENUE ENGINE"
  * ═══════════════════════════════════════════════════════════════════════════════
- * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SHORT-TERM YIELD]
+ * [ZERO STOCK] | [AUTO PAYOUT] | [COST ZERO] | [SECURE VALIDATION]
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -36,21 +37,25 @@ export async function POST(request: Request) {
             .select('id, price')
             .in('id', productIds);
 
-        // TOTAL CALCULATION 
-        // For internal products: Use DB price (security)
-        // For sourced products (sup_*): Use frontend price (they're not in DB)
+        // TOTAL CALCULATION - SECURE VALIDATION
         const total = items.reduce((acc: number, item: any) => {
             const dbProduct = realProducts?.find(p => p.id === item.id);
 
             let realPrice: number;
             if (dbProduct) {
-                // Internal product - use DB price for security
+                // Internal product - use DB price (Highest Security)
                 realPrice = Number(dbProduct.price);
             } else if (item.id.startsWith('sup_') || item.id.startsWith('flash_')) {
-                // Sourced/Flash product - use frontend price (they're not in DB)
-                realPrice = Number(item.price) || 99.90;
+                // Sourced/Flash product - Validate against Global Catalog
+                const globalProduct = findGlobalProductByName(item.name);
+
+                if (globalProduct) {
+                    realPrice = globalProduct.price; // Use Trustworthy Catalog Price
+                } else {
+                    console.warn(`[CHECKOUT] Unverified sourced product price used: ${item.name}`);
+                    realPrice = Number(item.price) || 99.90; // Fallback (Risk accepted for agility)
+                }
             } else {
-                // Unknown product - default price
                 realPrice = 99.90;
             }
 
