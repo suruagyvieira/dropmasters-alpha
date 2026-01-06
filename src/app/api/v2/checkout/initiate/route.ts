@@ -46,7 +46,18 @@ export async function POST(request: Request) {
                 // Internal product - use DB price (Highest Security)
                 realPrice = Number(dbProduct.price);
             } else if (item.id.startsWith('sup_') || item.id.startsWith('flash_')) {
-                // Sourced/Flash product - Validate against Global Catalog
+                // Sourced/Flash product - Validate Expiration & Price
+                if (item.id.startsWith('flash_')) {
+                    const parts = item.id.split('_');
+                    if (parts.length >= 2) {
+                        const timestamp = Number(parts[1]);
+                        // 24 hours = 86400000 ms expiration window
+                        if (!isNaN(timestamp) && (Date.now() - timestamp > 86400000)) {
+                            throw new Error(`Oferta Flash expirada: ${item.name}.`);
+                        }
+                    }
+                }
+
                 const globalProduct = findGlobalProductByName(item.name);
 
                 if (globalProduct) {
