@@ -10,18 +10,12 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
  * ═══════════════════════════════════════════════════════════════
  */
 
+import { CartItem } from '@/lib/cartTypes';
+export type { CartItem }; // Re-export for convenience if needed, but primary usage is via import
+
 const STORAGE_KEY = 'dropmasters_cart_v2';
 const MAX_QUANTITY = 10;
 const BUNDLE_DISCOUNT = 0.10; // 10% discount for 2+ items
-
-export interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-    metadata?: any; // Flexible metadata for custom items
-}
 
 interface CartContextType {
     cart: CartItem[];
