@@ -164,6 +164,17 @@ def living_ai_pivot():
             AUTONOMY_STATE["is_syncing"] = False
             cache["products"]["data"] = None
 
+@app.route('/health', methods=['GET'])
+def health():
+    """Monitoramento de Conexão Apex."""
+    status = {"server": "online", "supabase": "offline", "timestamp": datetime.datetime.now().isoformat()}
+    try:
+        if supabase:
+            supabase.table('products').select("id").limit(1).execute()
+            status["supabase"] = "online"
+    except: pass
+    return jsonify(status)
+
 # ==========================================
 # 🫂 INTERFACES CLIENTE (VICE-VERSA)
 # ==========================================
