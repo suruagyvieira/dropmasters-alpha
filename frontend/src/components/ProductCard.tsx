@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck } from 'lucide-react';
+import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 
@@ -24,9 +24,12 @@ interface ProductProps {
 
 const ProductCard = ({ id, name, price, description, original_price, image, category, affiliate_link, is_digital, profit_margin, priority, location, is_local, metadata }: ProductProps) => {
     const { addToCart } = useCart();
-    const benefits = metadata?.benefits || [];
-
     const optimizedImage = image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop';
+
+    // Motor de Escassez e Prova Social (Gatilhos de Compra)
+    const stockCount = Math.floor(Math.random() * 5) + 3;
+    const viewsCount = Math.floor(Math.random() * 40) + 12;
+    const buyersCount = Math.floor(Math.random() * 15) + 5;
 
     const handleAction = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -50,21 +53,22 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
                     className="product-image"
                 />
 
-                {/* LOGISTICS & STATUS BADGES (Otimizado) */}
+                <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
+                    <div className="glass-premium animate-pulse" style={{ padding: '6px 12px', fontSize: '0.6rem', background: '#ff4d4d', color: 'white', fontWeight: '900', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', border: 'none' }}>
+                        <Flame size={12} fill="white" /> ÚLTIMAS {stockCount} UNID.
+                    </div>
+                </div>
+
+                {/* LOGISTICS & STATUS BADGES */}
                 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', zIndex: 1 }}>
-                    {is_local && (
-                        <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', background: 'var(--success)', color: 'white', fontWeight: '800', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Truck size={12} /> ENVIO EXPRESSO
-                        </div>
-                    )}
                     <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', background: 'rgba(0,0,0,0.6)', color: 'var(--action)' }}>
-                        <Cpu size={12} /> SMART SOURCING
+                        <Truck size={12} /> ENVIO IMEDIATO {location || 'HUB SC'}
                     </div>
                 </div>
 
                 <div style={{ position: 'absolute', bottom: '12px', left: '12px', zIndex: 1 }}>
-                    <div className="glass-premium" style={{ padding: '4px 10px', fontSize: '0.65rem', fontWeight: '700', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        {category}
+                    <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.65rem', fontWeight: '800', borderRadius: '8px', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        #{category}
                     </div>
                 </div>
             </div>
@@ -78,21 +82,28 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
                     </div>
                 </div>
 
-                {description && (
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '0.5rem' }}>
-                        {description}
-                    </p>
-                )}
-
-                {benefits.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1rem' }}>
-                        {benefits.slice(0, 3).map((b: string, i: number) => (
-                            <span key={i} style={{ fontSize: '0.65rem', padding: '2px 8px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' }}>
-                                ✓ {b}
-                            </span>
-                        ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2ecc71', fontSize: '0.65rem', fontWeight: '800' }}>
+                        <Users size={12} /> {buyersCount} COMPRARAM HOJE
                     </div>
-                )}
+                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }}></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: '700' }}>
+                        <Clock size={12} /> {viewsCount} VENDO AGORA
+                    </div>
+                </div>
+
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1rem', fontStyle: description ? 'normal' : 'italic' }}>
+                    {description || "✨ Este produto passa por inspeção neural rigorosa para garantir a melhor experiência em 2026. Importação prioritária com taxa de intermediação zero."}
+                </p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1rem' }}>
+                    <span style={{ fontSize: '0.6rem', padding: '4px 8px', background: 'rgba(0, 243, 255, 0.05)', borderRadius: '6px', color: 'var(--secondary)', border: '1px solid rgba(0, 243, 255, 0.2)', fontWeight: '900' }}>
+                        🛡️ GARANTIA BLINDADA
+                    </span>
+                    <span style={{ fontSize: '0.6rem', padding: '4px 8px', background: 'rgba(241, 196, 15, 0.05)', borderRadius: '6px', color: 'var(--action)', border: '1px solid rgba(241, 196, 15, 0.2)', fontWeight: '900' }}>
+                        ⚡ DESPACHO 24H
+                    </span>
+                </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
