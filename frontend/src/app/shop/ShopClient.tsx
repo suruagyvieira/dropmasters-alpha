@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
-import { useCart, CartItem } from '@/context/CartContext';
+import { useCart } from '@/context/CartContext';
+import type { CartItem } from '@/context/CartContext';
 // ... (imports remain the same)
 import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe, MapPin } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
