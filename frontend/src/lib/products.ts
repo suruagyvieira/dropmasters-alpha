@@ -19,6 +19,7 @@ export interface Product {
     analysis?: any;
     metadata?: any;
     location?: string;
+    ai_mood?: string;
 }
 
 export const MOCK_PRODUCTS: Product[] = [
