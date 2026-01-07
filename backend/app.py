@@ -10,7 +10,7 @@ import requests
 from functools import wraps
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from competitive_engine import analyze_competitive_pressure, get_predatory_margin
+from competitive_engine import analyze_competitive_pressure, get_predatory_margin, ApexLegendGenerator
 from support_engine import simulate_chat_interaction, CustomSourcingEngine
 from supplier import Autopilot
 
@@ -162,10 +162,14 @@ def living_ai_pivot(force=False):
             
             final_price = round(base * multiplier * loc_adj, 2) + 0.99
             
+            # Legenda Agressiva Neural
+            legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], p.get('category', 'Premium'))
+
             # Update ONLY critical fields to save I/O
             batch.append({
                 "id": p['id'],
                 "price": final_price,
+                "description": legend,
                 "stock": random.randint(2, 6) if sup_pressure > 0.7 else random.randint(10, 20),
                 "updated_at": datetime.datetime.now().isoformat()
             })
