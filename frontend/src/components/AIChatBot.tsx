@@ -180,10 +180,15 @@ export default function AIChatBot() {
                         ))}
 
                         {isTyping && (
-                            <div style={{ display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', alignSelf: 'flex-start', width: 'fit-content' }}>
-                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '0ms' }}></div>
-                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '200ms' }}></div>
-                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '400ms' }}></div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)', alignSelf: 'flex-start' }}>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '0ms' }}></div>
+                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '200ms' }}></div>
+                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '400ms' }}></div>
+                                </div>
+                                <div style={{ fontSize: '0.65rem', color: 'var(--action)', fontFamily: 'monospace', opacity: 0.8 }}>
+                                    {['[SYNAPSE_INIT]', '[SCANN_LOGISTICS_HUB]', '[CALC_ROI_MARGIN]', '[SYNTHESIZING_RESPONSE]'][Math.floor(Date.now() / 1000) % 4]}
+                                </div>
                             </div>
                         )}
                     </div>

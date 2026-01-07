@@ -537,6 +537,51 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 </div>
             )}
 
+            {products.length > 0 && (
+                <div className="glass shadow-premium" style={{
+                    marginBottom: '2.5rem',
+                    padding: '1.5rem 2rem',
+                    borderRadius: '24px',
+                    background: 'rgba(5, 5, 10, 0.4)',
+                    border: '1px solid rgba(139, 92, 246, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '1.5rem'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div className="pulse-ai" style={{
+                            width: '48px', height: '48px',
+                            background: 'var(--primary)',
+                            borderRadius: '14px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 20px var(--primary-glow)'
+                        }}>
+                            <BrainCircuit size={24} color="#fff" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--secondary)', fontWeight: '900', letterSpacing: '2px', marginBottom: '2px' }}>NEURAL INTELLIGENCE CORE</div>
+                            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                MODO: {products[0]?.ai_mood?.toUpperCase() || 'APEX'}
+                                <span className="pulse-ai" style={{ width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%' }}></span>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '2rem', flex: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '4px' }}>PRECIFICAÇÃO DINÂMICA</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--action)' }}>ATIVA | {new Date().toLocaleTimeString()}</div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '4px' }}>LOGÍSTICA PREVENTIVA</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#22c55e' }}>HUB SP-SC ONLINE</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {error && (
                 <div className="glass" style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <ShieldCheck size={20} />

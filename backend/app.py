@@ -334,6 +334,9 @@ def support_chat():
     if interaction.get('sentiment') == "FRUSTRATED":
         with autonomy_lock: AUTONOMY_STATE["dissatisfaction_score"] += 1.0
     
+    # Neural Synthesis Delay (To feel more human/alive)
+    time.sleep(random.uniform(1.2, 2.8))
+    
     return jsonify(interaction)
 
 # --- NEURAL PULSE ---
