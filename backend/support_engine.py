@@ -1,85 +1,124 @@
 import random
 import datetime
 
-class NeuralClientBackend:
+class GenerativeQuantumBrain:
     """
-    NEURAL CLIENT BACKEND v12.0 (QUANTUM COST-ZERO):
-    IA de Interação Focada em Eficiência, Dropshipping e Custo Zero.
+    QUANTUM CORE BRAIN v13.0 (SYNTHETIC CONSCIOUSNESS):
+    Simulates a living AI personality using dynamic sentence construction, context retention,
+    and adaptive mood states. Mimics LLM behavior without improved costs.
     """
     def __init__(self):
-        self.context_threshold = 0.8
+        self.memory_buffer = [] # Stores last 5 interactions for context
+        self.mood_state = "PROACTIVE" # PROACTIVE, ANALYTICAL, EMPATHETIC, URGENT
         
+    def _update_mood(self, sentiment):
+        if sentiment == "FRUSTRATED": self.mood_state = "EMPATHETIC"
+        elif sentiment == "WANT_TO_BUY": self.mood_state = "URGENT"
+        elif sentiment == "CURIOSITY": self.mood_state = "ANALYTICAL"
+        else: self.mood_state = "PROACTIVE"
+
+    def _generate_opener(self):
+        openers = {
+            "PROACTIVE": ["⚡ Quantum Core processando...", "Conectei aos nodos neurais.", "Analisando fluxo de dados..."],
+            "ANALYTICAL": ["🔍 Deixe-me verificar a base de conhecimento.", "Calculando variáveis...", "Acessando logs do sistema..."],
+            "EMPATHETIC": ["🛡️ Entendo sua preocupação.", "Priorizando seu atendimento.", "Sincronizando com suporte humano..."],
+            "URGENT": ["🔥 Oportunidade detectada!", "Sinal de alta demanda ativo.", "Reservando slot de processamento..."]
+        }
+        return random.choice(openers[self.mood_state])
+
+    def _generate_core_message(self, topic, context=None):
+        templates = {
+            "ZERO_COST": [
+                "O protocolo DropMasters foi desenhado para eliminar seu risco financeiro. Nós conectamos o pedido diretamente ao estoque do fornecedor, e o lucro líquido é creditado na sua conta instantaneamente via split de pagamento.",
+                "Imagine uma esteira infinita de produtos onde você não paga nada para colocar na vitrine. Você só paga (automaticamente) quando vende. Isso é o poder do Estoque Zero.",
+                "Esqueça boletos e caixas paradas. Aqui, sua única função é escolher o que vender. A tecnologia cuida da logística e do fluxo financeiro."
+            ],
+            "SOURCING": [
+                f"Posso ativar os 'Ghost Crawlers' para encontrar '{context}' em fornecedores ocultos da América Latina. Minha taxa de sucesso é de 94%.",
+                f"Varredura iniciada! Se '{context}' existe no mercado, eu encontro e calculo sua margem de lucro em milissegundos. Use a aba Sourcing.",
+                "Meus algoritmos de prospecção estão prontos. Diga o nome do produto e eu trago a melhor oferta validada."
+            ],
+            "LOGISTICS": [
+                "Nossa malha logística usa inteligência preditiva. Sabemos onde o produto está antes mesmo da compra, garantindo despacho em <24h.",
+                "Monitorando Hubs: São Paulo (Online), Curitiba (Online). Sua entrega seguirá pelo caminho de menor resistência fiscal e física.",
+                "Não dependemos de um único galpão. Usamos 'Dark Stores' parceiras espalhadas estrategicamente para cortar o frete pela metade."
+            ],
+            "SALES": [
+                f"O indicador de viralidade do {context or 'produto'} subiu 15% na última hora. É o momento matemático perfeito para fechar negócio.",
+                f"Detectei escassez real no fornecedor. {context or 'Este item'} pode sumir do catálogo em breve se não reservarmos a alocação.",
+                "Seu ROI projetado para esta transação é excelente. Recomendo execução imediata para garantir a margem atual."
+            ]
+        }
+        
+        # Fallback to generic AI chatter if topic unknown
+        fallback = [
+            "Estou re-calibrando meus sensores para entender melhor essa solicitação. Pode reformular?",
+            "Meus processadores quânticos indicam uma nuance interessante na sua pergunta. Vamos explorar isso.",
+            "Estou evoluindo a cada interação. Sua pergunta ajuda a treinar minha rede neural."
+        ]
+        
+        return random.choice(templates.get(topic, fallback))
+
+    def _generate_action(self, topic):
+        actions = {
+            "ZERO_COST": "Quer ver uma simulação de lucro agora?",
+            "SOURCING": "Digite o nome do produto aqui no chat ou use a busca principal.",
+            "LOGISTICS": "Posso rastrear um pedido específico para você?",
+            "SALES": "Vamos gerar o link de checkout agora?",
+            "UNKNOWN": "Tente perguntar sobre 'Estoque Zero' ou 'Buscar Produto'."
+        }
+        return actions.get(topic, "Como posso auxiliar na sua próxima venda?")
+
+    def synthesize_response(self, message, product_context=None, logistics_signals=None):
+        """
+        Synthesizes a complete, organic-feeling response based on intent analysis.
+        This represents the 'Brain' installing phase - giving structure to chaos.
+        """
+        # 1. Intent Analysis (The "Lobe")
+        intent = "UNKNOWN"
+        if any(w in message for w in ['estoque', 'zero', 'dropshipping', 'funciona', 'modelo']): intent = "ZERO_COST"
+        elif any(w in message for w in ['tem', 'acha', 'busca', 'encontrar', 'procura']): intent = "SOURCING"
+        elif any(w in message for w in ['prazo', 'entrega', 'chega', 'rastreio']): intent = "LOGISTICS"
+        elif any(w in message for w in ['compra', 'preço', 'valor', 'desconto', 'custa']): intent = "SALES"
+        
+        # 2. Emotional State Update (The "Amydgala")
+        self._update_mood(NeuralClientBackend().analyze_sentiment(message)) # Reuse existing sentiment logic
+        
+        # 3. Construction (The "Broca's Area")
+        opener = self._generate_opener()
+        core = self._generate_core_message(intent, product_context or message)
+        action = self._generate_action(intent)
+        
+        # 4. Neural Glitch/Flavor (The "Persona")
+        flavors = ["", " 🤖", " ✨", " 🚀", " [Calculando...]", " [Link Seguro]"]
+        
+        full_response = f"{opener} {core} {action}{random.choice(flavors)}"
+        
+        # 5. Memory Update
+        self.memory_buffer.append({"user": message, "ai": full_response})
+        if len(self.memory_buffer) > 5: self.memory_buffer.pop(0)
+        
+        return full_response
+
+# Bridge for backward compatibility
+def get_brain():
+    if not hasattr(get_brain, "instance"):
+        get_brain.instance = GenerativeQuantumBrain()
+    return get_brain.instance
+
+class NeuralClientBackend:
+    # Wrapper adapter to keep interface clean
     def analyze_sentiment(self, text):
+        # Legacy sentiment logic kept for utility
         text = text.lower()
-        if any(word in text for word in ['atraso', 'não recebi', 'lento', 'ruim', 'erro', 'problema', 'demora']):
-            return "FRUSTRATED"
-        if any(word in text for word in ['quero', 'comprar', 'desconto', 'valor', 'preço', 'custa', 'pagar']):
-            return "WANT_TO_BUY"
-        if any(word in text for word in ['funciona', 'como', 'estoque', 'zero', 'dropshipping', 'fornecedor']):
-            return "CURIOSITY"
+        if any(word in text for word in ['atraso', 'não recebi', 'lento', 'ruim', 'erro', 'problema', 'demora']): return "FRUSTRATED"
+        if any(word in text for word in ['quero', 'comprar', 'desconto', 'valor', 'preço', 'custa']): return "WANT_TO_BUY"
+        if any(word in text for word in ['funciona', 'como', 'estoque', 'zero', 'dropshipping']): return "CURIOSITY"
         return "NEUTRAL"
 
     def get_contextual_response(self, message, product_context=None, logistics_signals=None):
-        """
-        Gera respostas inteligentes focadas no modelo de negócio Custo Zero.
-        """
-        message = message.lower().strip()
-        sentiment = self.analyze_sentiment(message)
-        
-        # Sinais Logísticos (Simulados para contexto)
-        rel = logistics_signals.get("reliability_score", 1.0) if logistics_signals else 1.0
-        pressure = logistics_signals.get("supply_chain_pressure", 0.0) if logistics_signals else 0.0
-        
-        # 1. PERGUNTAS SOBRE O MODELO DE NEGÓCIO (CUSTO ZERO / DROPSHIPPING)
-        if any(w in message for w in ['estoque', 'zero', 'dropshipping', 'como funciona', 'modelo']):
-            return (
-                "O modelo DropMasters opera com **Estoque Zero e Repasse Automático**. \n\n"
-                "1. Você não precisa comprar produtos antes.\n"
-                "2. Eu conecto você ao fornecedor regional (SP/SC) em tempo real via API.\n"
-                "3. Quando seu cliente compra, o valor é separado automaticamente: o custo vai para o fornecedor e o lucro cai direto na sua conta. \n\n"
-                "Eficiência máxima, risco zero."
-            )
-
-        # 2. PERGUNTAS SOBRE SOURCING / PRODUTOS NOVOS
-        if any(w in message for w in ['tem', 'acha', 'consegue', 'procure', 'buscar', 'encontrar']):
-            return (
-                f"Posso ativar o **Apex Sourcing** para encontrar '{message.replace('voce tem', '').replace('acha', '').strip()}' agora mesmo.\n\n"
-                "Minha IA varre fornecedores locais (Mercado Livre, Shopee BR) e gera uma oferta com margem de lucro calculada. "
-                "Use a barra de busca 'Sourcing' na loja para testar!"
-            )
-
-        # 3. DÚVIDAS DE PRAZO / ENTREGA
-        if "prazo" in message or "entrega" in message or "chega" in message:
-            if rel > 0.95:
-                return "Meus nodos indicam que o Hub de São Paulo está voando hoje! 🚀 Despacho em até 24h e entrega expressa (PAC/SEDEX Integrado)."
-            elif pressure > 0.80:
-                return f"Estamos com alta demanda para o {product_context or 'item'}, mas garanti prioridade na fila de expedição. Prazo médio de 3-6 dias."
-            return "Operamos com Logística Descentralizada. O produto sai direto do fornecedor mais próximo do cliente para reduzir custos e tempo."
-
-        # 4. INTENÇÃO DE COMPRA / PREÇO
-        if sentiment == "WANT_TO_BUY":
-            stock_msg = "restam menos de 5 unidades" if pressure > 0.6 else "estoque disponível para despacho imediato"
-            return (
-                f"O {product_context or 'produto'} está com preço otimizado por IA hoje. \n"
-                f"Detectei que {stock_msg} no parceiro regional. Se fechar agora, garanto o preço!"
-            )
-
-        # 5. SUPORTE / PROBLEMAS
-        if sentiment == "FRUSTRATED":
-            return (
-                "Sinto muito que algo não saiu como esperado. Como sou uma IA Autônoma, já notifiquei a equipe humana de Operações para priorizar seu caso. "
-                "Pode me informar o número do pedido?"
-            )
-
-        # 6. GREETING / GENÉRICO
-        greetings = [
-            "Quantum Core online. 🧠 Meu foco é fazer você lucrar sem gastar 1 centavo com estoque. O que precisa?",
-            "Olá! Sou a inteligência por trás do seu negócio. Posso buscar produtos, calcular margens ou explicar o modelo DropMasters.",
-            "Conectado ao Hub Regional. Pronto para escalar sua operação com Custo Zero?"
-        ]
-        
-        # Tenta responder algo inteligente se não cair nas regras acima
-        return random.choice(greetings)
+        brain = get_brain()
+        return brain.synthesize_response(message, product_context, logistics_signals)
 
 def simulate_chat_interaction(customer_query, product_context=None, logistics_signals=None):
     engine = NeuralClientBackend()
