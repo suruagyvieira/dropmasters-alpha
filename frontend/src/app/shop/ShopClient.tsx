@@ -88,9 +88,12 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     }, []);
 
     // Critical Performance: Intelligent Polling
+    // Critical Performance: Intelligent Polling (Optimized)
     useEffect(() => {
         const fetchUpdates = async () => {
-            if (document.hidden) return;
+            // Check visibility state directly to pause background processing
+            if (document.hidden || document.visibilityState === 'hidden') return;
+
             try {
                 const data = await fetchApi('/api/v2/products');
                 if (Array.isArray(data)) {
@@ -100,8 +103,22 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             } catch (e) { }
         };
 
-        const interval = setInterval(fetchUpdates, 300000); // 5 min background refresh
-        return () => clearInterval(interval);
+        // Use a longer interval to reduce load (10 minutes)
+        const interval = setInterval(fetchUpdates, 600000);
+
+        // Initial check if window is focused
+        const onVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchUpdates(); // Refresh immediately when user returns
+            }
+        };
+
+        document.addEventListener('visibilitychange', onVisibilityChange);
+
+        return () => {
+            clearInterval(interval);
+            document.removeEventListener('visibilitychange', onVisibilityChange);
+        };
     }, []);
 
     const nameIndex = useMemo(() => {
