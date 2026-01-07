@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
-import { useCart } from '@/context/CartContext';
+import { useCart, CartItem } from '@/context/CartContext';
+// ... (imports remain the same)
 import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe, MapPin } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
@@ -229,18 +230,21 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
     const handleSourcingPurchase = () => {
         if (!sourcingResult) return;
-        addToCart({
+
+        const customItem: CartItem = {
             id: `custom_${Date.now()}`,
             name: sourcingResult.name,
             price: sourcingResult.estimated_price,
-            image: "https://images.unsplash.com/photo-1549463599-242406bd1f43?q=80&w=400&auto=format&fit=crop",
             quantity: 1,
+            image: "https://images.unsplash.com/photo-1549463599-242406bd1f43?q=80&w=400&auto=format&fit=crop",
             metadata: {
                 is_custom: true,
                 location: sourcingResult.location_signal,
                 original_link: sourcingQuery
             }
-        });
+        };
+
+        addToCart(customItem);
         // Feedback visual ou redirecionamento
         setSourcingResult(null);
         setSourcingQuery('');
