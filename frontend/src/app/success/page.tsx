@@ -5,6 +5,7 @@ import { CheckCircle, Package, ArrowRight, ShoppingBag, Zap, Clock } from 'lucid
 import Link from 'next/link';
 import { fetchApi } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
+import { CartItem } from '@/lib/cartTypes';
 import Image from 'next/image';
 
 export default function SuccessPage() {
@@ -124,7 +125,7 @@ export default function SuccessPage() {
                                             price: upsell.price,
                                             quantity: 1,
                                             image: upsell.image_url
-                                        });
+                                        } as CartItem);
                                         window.location.href = '/cart';
                                     }}
                                 >

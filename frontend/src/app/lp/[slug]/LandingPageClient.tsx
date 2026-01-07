@@ -3,12 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import {
-    Zap, ShieldCheck, Truck, Star,
-    ArrowRight, ShoppingCart, CheckCircle2,
-    Users, TrendingUp, Clock
-} from 'lucide-react';
+import { Zap, ShieldCheck, Truck, Star, ArrowRight, ShoppingCart, CheckCircle2, Users, TrendingUp, Clock } from 'lucide-react';
 import Image from 'next/image';
+import { CartItem } from '@/lib/cartTypes';
 
 interface LandingPageClientProps {
     product: any;
@@ -40,7 +37,7 @@ export default function LandingPageClient({ product }: LandingPageClientProps) {
             price: product.price,
             image: product.image_url,
             quantity: 1
-        });
+        } as CartItem);
         router.push('/cart');
     };
 
