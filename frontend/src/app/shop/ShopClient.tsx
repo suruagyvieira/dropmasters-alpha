@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
 import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe } from 'lucide-react';
@@ -16,6 +16,7 @@ interface Evidence {
 }
 
 export default function ShopClient({ initialProducts }: { initialProducts: Product[] }) {
+    const [fullCatalog, setFullCatalog] = useState<Product[]>(initialProducts);
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [highYieldProducts, setHighYieldProducts] = useState<Product[]>([]);
     const [recommendations, setRecommendations] = useState<Product[]>([]);
@@ -45,6 +46,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             const data = await fetchApi('/api/v2/products');
             if (Array.isArray(data)) {
                 setProducts(data);
+                setFullCatalog(data);
                 setError(null);
             }
         } catch (err) {
@@ -83,7 +85,10 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             if (document.hidden) return;
             try {
                 const data = await fetchApi('/api/v2/products');
-                if (Array.isArray(data)) setProducts(data);
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                    setFullCatalog(data);
+                }
             } catch (e) { }
         };
 
@@ -101,7 +106,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     useEffect(() => {
         if (!mounted || !searchTerm) {
             if (mounted && !searchTerm) {
-                setProducts(initialProducts);
+                setProducts(fullCatalog);
                 setSearchSource(null);
                 setSearchMessage('');
                 setGeoInfo(null);

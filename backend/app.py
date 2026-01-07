@@ -10,6 +10,9 @@ import requests
 from functools import wraps
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from competitive_engine import analyze_competitive_pressure, get_predatory_margin
+from support_engine import simulate_chat_interaction, CustomSourcingEngine
+from supplier import Autopilot
 
 load_dotenv()
 
@@ -122,16 +125,17 @@ def living_ai_pivot():
             seed = []
             for wp in WINNER_POOL:
                 seed.append({
-                    "id": f"seed_{wp['name'].lower().replace(' ', '_')}",
+                    "id": str(uuid.uuid4()),
                     "name": wp['name'], 
                     "description": wp['desc'],
                     "base_price": wp['base'], 
                     "category": wp['cat'],
                     "image_url": f"https://images.unsplash.com/photo-{wp['img']}?q=80&w=600",
                     "price": round(wp['base'] * 2.2, 2) + 0.99, 
+                    "is_active": True,
                     "metadata": {"location": wp['loc'], "benefits": wp['benefits']}
                 })
-            supabase.table('products').upsert(seed, on_conflict='name').execute()
+            supabase.table('products').insert(seed).execute()
             res = supabase.table('products').select("id, name, base_price, metadata").eq('is_active', True).execute()
 
         batch = []
@@ -139,21 +143,22 @@ def living_ai_pivot():
             base = float(p.get('base_price') or 0)
             if base <= 0: continue
             
-            # Priorização Local: SP/SC têm custos menores, IA pode reduzir preço para ganhar volume
+            # Priorização Local: SP/SC têm custos menores
             loc = (p.get('metadata') or {}).get('location', 'Global')
             loc_adj = 0.95 if loc in ['SP', 'SC'] else 1.0
             
             final_price = round(base * multiplier * loc_adj, 2) + 0.99
+            
+            # Update ONLY critical fields to save I/O
             batch.append({
-                "name": p['name'], "price": final_price,
-                "description": p.get('description', ''),
+                "id": p['id'],
+                "price": final_price,
                 "stock": random.randint(2, 6) if sup_pressure > 0.7 else random.randint(10, 20),
-                "metadata": p.get('metadata', {}),
                 "updated_at": datetime.datetime.now().isoformat()
             })
             
         if batch and supabase:
-            supabase.table('products').upsert(batch, on_conflict='name').execute()
+            supabase.table('products').upsert(batch).execute()
         
         add_log(f"🧠 APEX CYCLE: Mood {AUTONOMY_STATE['ai_mood']} | Supply {int(rel*100)}% | Pressure {int(sup_pressure*100)}%", "system")
         
@@ -231,7 +236,6 @@ def estimate_sourcing():
 @app.route('/api/v2/payments/callback', methods=['POST'])
 def payment_callback():
     """Automação de Repasse & Logística Regional."""
-    from supplier import Autopilot
     from whatsapp_automation import generate_payment_whatsapp_message, simulate_whatsapp_dispatch
 
     data = request.json
