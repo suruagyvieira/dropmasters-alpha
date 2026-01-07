@@ -20,6 +20,7 @@ interface CartItem {
     price: number;
     quantity: number;
     image: string;
+    metadata?: any;
 }
 
 interface CartContextType {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
+import { useCart } from '@/context/CartContext';
 import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
@@ -27,6 +28,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     const [sourcingQuery, setSourcingQuery] = useState('');
     const [sourcingResult, setSourcingResult] = useState<any>(null);
     const [isSourcing, setIsSourcing] = useState(false);
+    const { addToCart } = useCart();
     const searchParams = useSearchParams();
 
     useEffect(() => {
@@ -176,6 +178,33 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             setIsSourcing(false);
         }
     };
+
+    const handleSourcingPurchase = () => {
+        if (!sourcingResult) return;
+        addToCart({
+            id: `custom_${Date.now()}`,
+            name: sourcingResult.name,
+            price: sourcingResult.estimated_price,
+            image: "https://images.unsplash.com/photo-1549463599-242406bd1f43?q=80&w=400&auto=format&fit=crop",
+            quantity: 1,
+            metadata: {
+                is_custom: true,
+                location: sourcingResult.location_signal,
+                original_link: sourcingQuery
+            }
+        });
+        // Feedback visual ou redirecionamento
+        setSourcingResult(null);
+        setSourcingQuery('');
+    };
+
+    const filteredProducts = useMemo(() => {
+        if (!searchTerm) return fullCatalog;
+        return fullCatalog.filter(p =>
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm, fullCatalog]);
 
     return (
         <>
@@ -550,7 +579,11 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                                                     <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>R$ {(sourcingResult.estimated_price * 1.8).toFixed(2)}</span>
                                                     <span style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--secondary)' }}>R$ {sourcingResult.estimated_price.toFixed(2)}</span>
                                                 </div>
-                                                <button className="btn-cyber btn-action shadow-secondary" style={{ padding: '15px 40px', borderRadius: '16px', fontWeight: '900' }}>
+                                                <button
+                                                    className="btn-cyber btn-action shadow-secondary"
+                                                    style={{ padding: '15px 40px', borderRadius: '16px', fontWeight: '900' }}
+                                                    onClick={handleSourcingPurchase}
+                                                >
                                                     IMPORTAR & COMPRAR AGORA
                                                 </button>
                                             </div>

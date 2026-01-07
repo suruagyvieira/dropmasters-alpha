@@ -19,6 +19,12 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+# Global Exception Handler (Shield)
+@app.errorhandler(Exception)
+def handle_exception(e):
+    add_log(f"🔥 UNHANDLED ERROR: {str(e)}", "error")
+    return jsonify({"error": "Neural core is stabilizing. Please retry.", "status": 500}), 500
+
 # --- OMNI-SENTIENT CORE v11.7 (FINANCIAL PEAK) ---
 supabase_url = os.environ.get("SUPABASE_URL")
 supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
@@ -90,10 +96,17 @@ WINNER_POOL = [
     }
 ]
 
-def living_ai_pivot():
+def living_ai_pivot(force=False):
     with autonomy_lock:
         if AUTONOMY_STATE["is_syncing"]: return
+        
+        # Throttle: Se não houver conversões e o cache for recente, pula sincronia cara de DB
+        now = time.time()
+        if not force and now - AUTONOMY_STATE["last_sync"] < 3600 and AUTONOMY_STATE["conversion_count"] == 0:
+            return
+            
         AUTONOMY_STATE["is_syncing"] = True
+        AUTONOMY_STATE["last_sync"] = now
     
     try:
         # 1. Sincronia de Ciclo Omni
@@ -304,10 +317,12 @@ def support_chat():
 
 # --- NEURAL PULSE ---
 def neural_maintainer():
+    # Cold Start Bootstrap
+    time.sleep(10)
     while True:
         try:
             living_ai_pivot()
-            time.sleep(1800) 
+            time.sleep(3600) # Ciclo de 1 hora para economia de recursos
         except: time.sleep(60)
 
 threading.Thread(target=neural_maintainer, daemon=True).start()
