@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users } from 'lucide-react';
+import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users, Globe, Briefcase } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 
@@ -31,12 +31,20 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
     const viewsCount = Math.floor(Math.random() * 40) + 12;
     const buyersCount = Math.floor(Math.random() * 15) + 5;
 
+    // Metadados do Modelo de Negócio Apex (v14.0)
+    const businessModel = metadata?.business_model || 'DROPSHIPPING';
+    const modelTag = metadata?.model_tag || '📦 DESPACHO DIRETO';
+    const affiliateLink = metadata?.affiliate_link || affiliate_link;
+
     const handleAction = (e: React.MouseEvent) => {
         e.preventDefault();
-        if (affiliate_link) {
-            window.open(affiliate_link, '_blank');
+        if (businessModel === 'AFFILIATE' && affiliateLink) {
+            window.open(affiliateLink, '_blank');
         } else {
-            addToCart({ id, name, price, image: optimizedImage, quantity: 1 });
+            addToCart({
+                id, name, price, image: optimizedImage, quantity: 1,
+                metadata: { ...metadata, business_model: businessModel }
+            });
         }
     };
 
@@ -59,10 +67,10 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
                     </div>
                 </div>
 
-                {/* LOGISTICS & STATUS BADGES */}
                 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', zIndex: 1 }}>
-                    <div className="glass-premium shadow-secondary" style={{ padding: '6px 12px', fontSize: '0.65rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '10px', background: 'var(--secondary)', color: '#000' }}>
-                        <Truck size={14} /> RECEBA EM 2-5 DIAS
+                    <div className="glass-premium animate-pulse" style={{ padding: '6px 12px', fontSize: '0.65rem', background: businessModel === 'WHITE_LABEL' ? 'var(--primary)' : 'var(--secondary)', color: '#000', fontWeight: '900', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        {businessModel === 'AFFILIATE' ? <Globe size={14} /> : <Truck size={14} />}
+                        {modelTag}
                     </div>
                 </div>
 
@@ -75,7 +83,15 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff', letterSpacing: '-0.03em' }}>{name}</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff', letterSpacing: '-0.03em' }}>{name}</h3>
+                        {businessModel === 'MARKETPLACE' && (
+                            <span style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '700', marginTop: '2px' }}>
+                                <Briefcase size={10} style={{ display: 'inline', marginRight: '4px' }} />
+                                Vendido por: {metadata?.vendor_name || 'Parceiro Verificado'}
+                            </span>
+                        )}
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--action)', background: 'rgba(241, 196, 15, 0.1)', padding: '4px 8px', borderRadius: '8px' }}>
                         <Star size={12} fill="var(--action)" />
                         <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: '800' }}>4.9</span>
@@ -120,9 +136,9 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
                         className="btn-cyber btn-action"
                         style={{ width: '56px', height: '56px', borderRadius: '16px' }}
                         onClick={handleAction}
-                        title="Adicionar ao Carrinho"
+                        title={businessModel === 'AFFILIATE' ? 'Ver na Loja Oficial' : 'Adicionar ao Carrinho'}
                     >
-                        {affiliate_link ? <ExternalLink size={24} /> : <ShoppingCart size={24} />}
+                        {businessModel === 'AFFILIATE' ? <ExternalLink size={24} /> : <ShoppingCart size={24} />}
                     </button>
                 </div>
             </div>

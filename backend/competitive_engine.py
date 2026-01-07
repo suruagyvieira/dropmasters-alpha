@@ -1,26 +1,79 @@
 import random
 
+class ApexHybridEngine:
+    """
+    APEX HYBRID ENGINE v14.0:
+    Orquestrador Neural de Modelos de Negócio.
+    Decide qual motor usar: DROPSHIPPING | MARKETPLACE | AFILIADO | WHITE-LABEL
+    """
+    @staticmethod
+    def select_best_model(product_data, market_pressure):
+        price = float(product_data.get('price', 0))
+        base = float(product_data.get('base_price', 0)) or (price * 0.5)
+        
+        # 1. AFILIADO: Se a pressão for absurda e a margem pequena, priorizamos o Afiliado (Custo Zero Real)
+        if market_pressure > 0.9 and (price / base) < 1.3:
+            return {
+                "model": "AFFILIATE",
+                "tag": "🌐 REDE GLOBAL",
+                "strategy": "Volume de Comissão",
+                "risk": "Zero"
+            }
+            
+        # 2. MARKETPLACE: Se o produto for de nicho ou exigir expertise externa
+        if "Special" in product_data.get('name', ''):
+            return {
+                "model": "MARKETPLACE",
+                "tag": "🤝 PARCEIRO APEX",
+                "strategy": "Comissão de Plataforma",
+                "risk": "Baixo"
+            }
+            
+        # 3. WHITE-LABEL: Se a margem for alta (>2.5x), viramos Marca Própria para fidelizar
+        if (price / base) > 2.5:
+            return {
+                "model": "WHITE_LABEL",
+                "tag": "💎 EXCLUSIVO APEX",
+                "strategy": "Fidelização e Branding",
+                "risk": "Médio"
+            }
+            
+        # 4. DROPSHIPPING: Padrão para itens de giro rápido
+        return {
+            "model": "DROPSHIPPING",
+            "tag": "📦 DESPACHO DIRETO",
+            "strategy": "Giro Rápido",
+            "risk": "Baixo"
+        }
+
 class ApexLegendGenerator:
     """
     NEURAL COPYWRITING v13.0: 
     Transforma desvantagens logísticas em vantagens competitivas imbatíveis.
     """
     @staticmethod
-    def generate_aggressive_copy(product_name, category="Premium"):
-        # Mapeamento de 'Dor' para 'Solução Apex'
-        solutions = [
-            "🛡️ INSPEÇÃO NEURAL: Esqueça produtos falsos. Cada unidade passa por triagem robótica em nosso Hub.",
-            "⚡ HUB NACIONAL: Chega de esperar meses. Priorização de despacho via SP/SC com rastreio blindado.",
-            "💎 EXCLUSIVIDADE APEX: Você não está comprando um genérico, está adquirindo a curadoria oficial DropMasters.",
-            "💰 TAXA ZERO: Intermediação direta com o fabricante. O melhor preço do Brasil garantido pela nossa IA.",
-            "🔄 GARANTIA BLINDADA: Troca facilitada sem dor de cabeça. Nós assumimos o risco total por você.",
-            "🛰️ ESTOQUE REAL-TIME: Nosso sistema pulsa com o fornecedor. Se está aqui, está reservado para você."
+    def generate_aggressive_copy(product_name, model_info):
+        model = model_info.get('model', 'DROPSHIPPING')
+        
+        # Soluções específicas por modelo
+        model_hooks = {
+            "AFFILIATE": "� ACESSO DIRETO: Conectamos você à maior rede de suprimentos global com preço de atacado.",
+            "MARKETPLACE": "🤝 CURADORIA PARCEIRA: Item selecionado de nossos vendedores certificados com garantia Apex.",
+            "WHITE_LABEL": "💎 LINHA ELITE: Produto premium com especificações exclusivas da marca DropMasters.",
+            "DROPSHIPPING": "⚡ HUB PRIORITÁRIO: Logística Apex otimizada para entrega rápida via hub SP/SC."
+        }
+        
+        general_solutions = [
+            "🛡️ INSPEÇÃO NEURAL: Cada unidade passa por triagem robótica em nosso Hub.",
+            "💰 TAXA ZERO: Intermediação direta para garantir o melhor preço do Brasil.",
+            "🔄 GARANTIA BLINDADA: Nós assumimos o risco. Satisfação ou retorno imediato.",
+            "🛰️ ESTOQUE REAL-TIME: Sistema em simbiose com o fabricante. Se está aqui, está reservado."
         ]
         
-        selected = random.sample(solutions, 3)
+        selected = [model_hooks.get(model)] + random.sample(general_solutions, 2)
         
-        main_legend = f"🚀 O {product_name} que você buscava, agora com o selo de performance Apex v13.0. "
-        main_legend += "Diferente de lojas comuns, operamos em Simbiose Tecnológica para garantir: "
+        main_legend = f"🚀 {product_name} [{model_info.get('tag')}]. "
+        main_legend += "Agressividade comercial Apex v14.0 ativada: "
         main_legend += " | ".join(selected)
         
         return main_legend

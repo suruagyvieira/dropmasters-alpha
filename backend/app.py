@@ -10,7 +10,7 @@ import requests
 from functools import wraps
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from competitive_engine import analyze_competitive_pressure, get_predatory_margin, ApexLegendGenerator
+from competitive_engine import analyze_competitive_pressure, get_predatory_margin, ApexLegendGenerator, ApexHybridEngine
 from support_engine import simulate_chat_interaction, CustomSourcingEngine
 from supplier import Autopilot
 
@@ -160,19 +160,27 @@ def living_ai_pivot(force=False):
             loc = (p.get('metadata') or {}).get('location', 'Global')
             loc_adj = 0.95 if loc in ['SP', 'SC'] else 1.0
             
-            final_price = round(base * multiplier * loc_adj, 2) + 0.99
+            # Seletor de Modelo Híbrido Apex
+            model_info = ApexHybridEngine.select_best_model(p, m_pressure)
             
-            # Legenda Agressiva Neural
-            legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], p.get('category', 'Premium'))
+            # Legenda Agressiva Neural Baseada no Modelo
+            legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], model_info)
 
-            # Update ONLY critical fields to save I/O
-            batch.append({
+            # Update critical fields + Model Info
+            update_payload = {
                 "id": p['id'],
                 "price": final_price,
                 "description": legend,
                 "stock": random.randint(2, 6) if sup_pressure > 0.7 else random.randint(10, 20),
-                "updated_at": datetime.datetime.now().isoformat()
-            })
+                "updated_at": datetime.datetime.now().isoformat(),
+                "metadata": {
+                    **(p.get('metadata') or {}),
+                    "business_model": model_info['model'],
+                    "model_tag": model_info['tag'],
+                    "strategy": model_info['strategy']
+                }
+            }
+            batch.append(update_payload)
             
         if batch and supabase:
             supabase.table('products').upsert(batch).execute()
