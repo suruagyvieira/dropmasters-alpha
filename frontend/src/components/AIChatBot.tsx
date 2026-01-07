@@ -68,108 +68,181 @@ export default function AIChatBot() {
                     onClick={() => setIsOpen(true)}
                     className="pulse-ai optimistic"
                     style={{
-                        width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary)',
-                        border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)', cursor: 'pointer'
+                        width: '64px', height: '64px', borderRadius: '50%',
+                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 0 30px rgba(139, 92, 246, 0.6)', cursor: 'pointer',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                    <MessageCircle color="#fff" size={28} />
+                    <MessageCircle color="#fff" size={32} />
+                    <span style={{
+                        position: 'absolute', top: 0, right: 0,
+                        width: '16px', height: '16px', background: '#22c55e',
+                        borderRadius: '50%', border: '2px solid #000'
+                    }}></span>
                 </button>
             ) : (
-                <div className="glass animate-slide-up neural-glow" style={{
-                    width: '350px',
-                    height: '500px',
+                <div className="animate-slide-up" style={{
+                    width: '380px',
+                    height: '600px',
                     display: 'flex',
                     flexDirection: 'column',
-                    border: '1px solid var(--primary-glow)',
-                    background: 'rgba(10, 10, 15, 0.98)',
-                    filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))',
+                    background: 'rgba(5, 5, 10, 0.85)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1) inset',
+                    borderRadius: '24px',
                     overflow: 'hidden',
-                    borderRadius: '16px'
+                    fontFamily: '"Outfit", sans-serif'
                 }}>
-                    {/* Header */}
-                    <div style={{ padding: '1.2rem', background: 'var(--primary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Bot size={20} color="#fff" />
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontWeight: '800', color: '#fff', fontSize: '0.9rem', letterSpacing: '1px', lineHeight: '1' }}>QUANTUM CORE</span>
-                                <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.7)', fontWeight: '400' }}>AGENTIC SUPPORT v2026.4</span>
+                    {/* Header Premium */}
+                    <div style={{
+                        padding: '1.5rem',
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%)',
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                                width: '40px', height: '40px', borderRadius: '12px',
+                                background: 'linear-gradient(135deg, var(--primary) 0%, var(--action) 100%)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)'
+                            }}>
+                                <Bot size={22} color="#fff" />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                <span style={{ fontWeight: '800', color: '#fff', fontSize: '1rem', letterSpacing: '0.5px' }}>QUANTUM CORE</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span className="pulse-ai" style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }}></span>
+                                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: '600', letterSpacing: '1px' }}>ONLINE | v2026.4</span>
+                                </div>
                             </div>
                         </div>
-                        <X color="#fff" size={20} style={{ cursor: 'pointer' }} onClick={() => setIsOpen(false)} />
+                        <button
+                            onClick={() => setIsOpen(false)}
+                            style={{
+                                background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px',
+                                color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s'
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                        >
+                            <X size={24} />
+                        </button>
                     </div>
 
-                    {/* Chat Area */}
+                    {/* Chat Area - Matrix Style */}
                     <div
                         ref={scrollRef}
-                        style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', scrollBehavior: 'smooth' }}
+                        style={{
+                            flex: 1, padding: '1.5rem', overflowY: 'auto',
+                            display: 'flex', flexDirection: 'column', gap: '1.2rem',
+                            scrollBehavior: 'smooth',
+                            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)'
+                        }}
                     >
-                        <div className="glass" style={{ padding: '10px', fontSize: '0.7rem', background: 'rgba(255,255,255,0.03)', color: 'var(--text-muted)', textAlign: 'center', borderRadius: '8px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                            <Sparkles size={12} style={{ display: 'inline', marginRight: '5px', verticalAlign: 'middle' }} />
-                            A conexão criptografada via rede neural está ativa.
+                        <div style={{
+                            fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center',
+                            padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)', display: 'inline-flex', alignSelf: 'center',
+                            alignItems: 'center', gap: '6px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                        }}>
+                            <Sparkles size={12} color="var(--action)" />
+                            <span>Link Neural Criptografado Estabelecido</span>
                         </div>
 
                         {messages.map((m, i) => (
-                            <div key={i} style={{
+                            <div key={i} className="animate-fade-in" style={{
                                 alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                                maxWidth: '85%', padding: '12px 16px', borderRadius: '14px',
-                                fontSize: '0.85rem', lineHeight: '1.5',
-                                background: m.role === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.07)',
-                                color: '#fff',
-                                border: m.role === 'bot' ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                                boxShadow: m.role === 'user' ? '0 4px 15px rgba(139, 92, 246, 0.2)' : 'none'
+                                maxWidth: '85%',
+                                padding: '14px 18px',
+                                borderRadius: m.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                fontSize: '0.9rem', lineHeight: '1.6',
+                                background: m.role === 'user'
+                                    ? 'linear-gradient(135deg, var(--primary) 0%, #6d28d9 100%)'
+                                    : 'rgba(255,255,255,0.05)',
+                                color: m.role === 'user' ? '#fff' : 'rgba(255,255,255,0.9)',
+                                border: m.role === 'bot' ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                                boxShadow: m.role === 'user'
+                                    ? '0 10px 30px -10px rgba(139, 92, 246, 0.5)'
+                                    : '0 4px 20px rgba(0,0,0,0.2)',
+                                backdropFilter: 'blur(5px)'
                             }}>
                                 {m.text}
                             </div>
                         ))}
+
                         {isTyping && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '5px' }}>
-                                <div className="pulse-ai" style={{ width: '8px', height: '8px', background: 'var(--accent)', borderRadius: '50%' }}></div>
-                                <span style={{ fontSize: '0.7rem', color: 'var(--accent)', fontWeight: '600', letterSpacing: '0.5px' }}>
-                                    QUANTUM PROCESSING...
-                                </span>
+                            <div style={{ display: 'flex', gap: '4px', padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', alignSelf: 'flex-start', width: 'fit-content' }}>
+                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '0ms' }}></div>
+                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '200ms' }}></div>
+                                <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '400ms' }}></div>
                             </div>
                         )}
                     </div>
 
-                    {/* Input Area */}
-                    <div style={{ padding: '1.2rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.2)' }}>
-                        <input
-                            type="text"
-                            placeholder="Consultar rede neural..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            style={{
-                                flex: 1,
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '12px',
-                                padding: '12px 16px',
-                                color: '#fff',
-                                fontSize: '0.85rem',
-                                outline: 'none'
-                            }}
-                        />
-                        <button
-                            onClick={handleSend}
-                            disabled={isTyping}
-                            style={{
-                                width: '45px',
-                                height: '45px',
-                                borderRadius: '12px',
-                                background: 'var(--primary)',
-                                border: 'none',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer',
-                                opacity: isTyping ? 0.5 : 1,
-                                transition: 'all 0.2s ease'
-                            }}
+                    {/* Input Area - Floating Dock */}
+                    <div style={{ padding: '1.5rem', background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%)' }}>
+                        <div style={{
+                            display: 'flex', gap: '10px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '16px', padding: '8px',
+                            boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)',
+                            transition: 'border-color 0.2s'
+                        }}
+                            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+                            onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
                         >
-                            <Send size={20} color="#fff" />
-                        </button>
+                            <input
+                                type="text"
+                                placeholder="Digite seu comando..."
+                                value={input}
+                                autoFocus
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                style={{
+                                    flex: 1,
+                                    background: 'transparent',
+                                    border: 'none',
+                                    padding: '10px 14px',
+                                    color: '#fff',
+                                    fontWeight: '500',
+                                    fontSize: '0.95rem',
+                                    outline: 'none',
+                                    fontFamily: 'inherit'
+                                }}
+                            />
+                            <button
+                                onClick={handleSend}
+                                disabled={isTyping}
+                                className="btn-cyber"
+                                style={{
+                                    width: '42px',
+                                    height: '42px',
+                                    borderRadius: '12px',
+                                    padding: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    opacity: input.trim() ? 1 : 0.5,
+                                    transform: input.trim() ? 'scale(1)' : 'scale(0.95)',
+                                    transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                                }}
+                            >
+                                <Send size={18} color="#fff" style={{ marginLeft: input.trim() ? '2px' : 0 }} />
+                            </button>
+                        </div>
+                        <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                                Powered by Apex Neural Link
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
