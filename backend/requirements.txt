@@ -6,3 +6,4 @@ requests>=2.32.0
 pytz>=2024.1
 gunicorn>=23.0.0
 mercadopago>=2.2.0
+beautifulsoup4>=4.12.0

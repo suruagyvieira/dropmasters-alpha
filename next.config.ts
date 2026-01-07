@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* Configurações de performance */
@@ -14,9 +15,13 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
+  // @ts-ignore
+  turbopack: {
+    root: path.resolve(__dirname),
+  },
   reactStrictMode: true,
   poweredByHeader: false, // Segurança: Oculta que a loja usa Next.js
-  /* config options here */
+  output: 'standalone',
 };
 
 export default nextConfig;

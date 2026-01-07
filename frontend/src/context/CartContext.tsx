@@ -14,7 +14,7 @@ const STORAGE_KEY = 'dropmasters_cart_v2';
 const MAX_QUANTITY = 10;
 const BUNDLE_DISCOUNT = 0.10; // 10% discount for 2+ items
 
-interface CartItem {
+export interface CartItem {
     id: string;
     name: string;
     price: number;

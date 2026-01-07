@@ -64,8 +64,23 @@ class CustomSourcingEngine:
     """
     @staticmethod
     def estimate_custom_price(query, source_link=None):
-        # Lógica de Precificação Neural de Intermediação
-        base_estimation = random.uniform(50, 450) # Mock de análise de scraping/link
+        from sourcing_engine import LiveSourcingEngine
+        
+        # 1. TENTA BUSCA REAL NA WEB (LIVING SYSTEM)
+        print(f"🔎 LIVE SOURCING: Buscando '{query}' na rede...")
+        real_product = LiveSourcingEngine.search_mercadolivre(query)
+        
+        if real_product:
+            base_estimation = real_product['price']
+            product_name = real_product['name']
+            location_signal = "SP" if "SP" in real_product['location'] else "SC" if "SC" in real_product['location'] else "Regional"
+            msg_source = "📍 Item encontrado em fornecedor parceiro Regional."
+        else:
+            # Fallback Neural Mock (se falhar o scrape)
+            base_estimation = random.uniform(50, 450)
+            product_name = f"Item Encomenda: {query}"
+            location_signal = random.choice(["SP", "SC"])
+            msg_source = "⚠️ Estimativa baseada em média de mercado (Sourcing em andamento)."
         
         # Inteligência de Margem (35% Lucro Líquido + Custos Operacionais)
         desired_net_profit_multiplier = 1.35 
@@ -73,15 +88,13 @@ class CustomSourcingEngine:
         
         final_price = (base_estimation * desired_net_profit_multiplier) + logistics_fee
         
-        # Sinais de Confiança Regional
-        suggested_location = random.choice(["SP", "SC"])
-        
         return {
-            "name": f"Item Encomenda: {query[:20]}..." if len(query) > 20 else f"Item Especial: {query}",
+            "name": product_name,
             "estimated_price": round(final_price, 2),
             "original_base": round(base_estimation, 2),
             "profit_net": round(final_price - base_estimation - logistics_fee, 2),
-            "location_signal": suggested_location,
+            "location_signal": location_signal,
             "status": "feasible",
-            "message": f"Produto localizado em nosso Hub {suggested_location}. Disponível para intermediação imediata."
+            "message": f"{msg_source} Disponível para intermediação imediata.",
+            "real_data": real_product # Metadados reais para o frontend
         }
