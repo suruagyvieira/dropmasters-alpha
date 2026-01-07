@@ -66,187 +66,153 @@ export default function AIChatBot() {
             {!isOpen ? (
                 <button
                     onClick={() => setIsOpen(true)}
-                    className="pulse-ai optimistic"
+                    className="shadow-premium"
                     style={{
-                        width: '64px', height: '64px', borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
-                        border: '1px solid rgba(255,255,255,0.2)',
+                        width: '60px', height: '60px', borderRadius: '50%',
+                        background: 'var(--primary)',
+                        border: 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 0 30px rgba(139, 92, 246, 0.6)', cursor: 'pointer',
-                        backdropFilter: 'blur(10px)',
-                        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        color: 'white',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                 >
-                    <MessageCircle color="#fff" size={32} />
-                    <span style={{
-                        position: 'absolute', top: 0, right: 0,
-                        width: '16px', height: '16px', background: '#22c55e',
-                        borderRadius: '50%', border: '2px solid #000'
-                    }}></span>
+                    <MessageCircle size={28} />
                 </button>
             ) : (
-                <div className="animate-slide-up" style={{
-                    width: '380px',
-                    height: '600px',
+                <div className="animate-fade-in shadow-premium" style={{
+                    width: '360px',
+                    height: '550px',
                     display: 'flex',
                     flexDirection: 'column',
-                    background: 'rgba(5, 5, 10, 0.85)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 40px 100px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1) inset',
-                    borderRadius: '24px',
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '20px',
                     overflow: 'hidden',
-                    fontFamily: '"Outfit", sans-serif'
+                    fontFamily: 'var(--font-main)'
                 }}>
-                    {/* Header Premium */}
+                    {/* Header */}
                     <div style={{
-                        padding: '1.5rem',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%)',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        padding: '1.25rem',
+                        background: 'var(--primary)',
+                        color: 'white',
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div style={{
-                                width: '40px', height: '40px', borderRadius: '12px',
-                                background: 'linear-gradient(135deg, var(--primary) 0%, var(--action) 100%)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                boxShadow: '0 0 15px rgba(139, 92, 246, 0.4)'
+                                width: '38px', height: '38px', borderRadius: '10px',
+                                background: 'rgba(255,255,255,0.2)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
                             }}>
                                 <Bot size={22} color="#fff" />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                <span style={{ fontWeight: '800', color: '#fff', fontSize: '1rem', letterSpacing: '0.5px' }}>QUANTUM CORE</span>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>Suporte DropMasters</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span className="pulse-ai" style={{ width: '6px', height: '6px', background: '#22c55e', borderRadius: '50%' }}></span>
-                                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.5)', fontWeight: '600', letterSpacing: '1px' }}>ONLINE | v2026.4</span>
+                                    <span style={{ width: '6px', height: '6px', background: '#4ade80', borderRadius: '50%' }}></span>
+                                    <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.8)', fontWeight: '500' }}>Atendimento Online</span>
                                 </div>
                             </div>
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            style={{
-                                background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px',
-                                color: 'rgba(255,255,255,0.4)', transition: 'color 0.2s'
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#fff', opacity: 0.7 }}
                         >
-                            <X size={24} />
+                            <X size={20} />
                         </button>
                     </div>
 
-                    {/* Chat Area - Matrix Style */}
+                    {/* Chat Area */}
                     <div
                         ref={scrollRef}
                         style={{
-                            flex: 1, padding: '1.5rem', overflowY: 'auto',
-                            display: 'flex', flexDirection: 'column', gap: '1.2rem',
-                            scrollBehavior: 'smooth',
-                            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)'
+                            flex: 1, padding: '1.25rem', overflowY: 'auto',
+                            display: 'flex', flexDirection: 'column', gap: '1rem',
+                            background: '#f8fafc'
                         }}
                     >
                         <div style={{
-                            fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center',
-                            padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)',
-                            border: '1px solid rgba(255,255,255,0.05)', display: 'inline-flex', alignSelf: 'center',
-                            alignItems: 'center', gap: '6px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                            fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center',
+                            margin: '0.5rem 0', fontWeight: '500'
                         }}>
-                            <Sparkles size={12} color="var(--action)" />
-                            <span>Link Neural Criptografado Estabelecido</span>
+                            Conectado com sucesso
                         </div>
 
                         {messages.map((m, i) => (
-                            <div key={i} className="animate-fade-in" style={{
+                            <div key={i} style={{
                                 alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
                                 maxWidth: '85%',
-                                padding: '14px 18px',
-                                borderRadius: m.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-                                fontSize: '0.9rem', lineHeight: '1.6',
-                                background: m.role === 'user'
-                                    ? 'linear-gradient(135deg, var(--primary) 0%, #6d28d9 100%)'
-                                    : 'rgba(255,255,255,0.05)',
-                                color: m.role === 'user' ? '#fff' : 'rgba(255,255,255,0.9)',
-                                border: m.role === 'bot' ? '1px solid rgba(255,255,255,0.05)' : 'none',
-                                boxShadow: m.role === 'user'
-                                    ? '0 10px 30px -10px rgba(139, 92, 246, 0.5)'
-                                    : '0 4px 20px rgba(0,0,0,0.2)',
-                                backdropFilter: 'blur(5px)'
+                                padding: '10px 14px',
+                                borderRadius: m.role === 'user' ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
+                                fontSize: '0.9rem', lineHeight: '1.5',
+                                background: m.role === 'user' ? 'var(--primary)' : '#fff',
+                                color: m.role === 'user' ? '#fff' : 'var(--foreground)',
+                                border: m.role === 'bot' ? '1px solid #e2e8f0' : 'none',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                             }}>
                                 {m.text}
                             </div>
                         ))}
 
                         {isTyping && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid rgba(139, 92, 246, 0.2)', alignSelf: 'flex-start' }}>
-                                <div style={{ display: 'flex', gap: '6px' }}>
-                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '0ms' }}></div>
-                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '200ms' }}></div>
-                                    <div className="pulse-ai" style={{ width: '6px', height: '6px', background: 'var(--action)', borderRadius: '50%', animationDelay: '400ms' }}></div>
-                                </div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--action)', fontFamily: 'monospace', opacity: 0.8 }}>
-                                    {['[SYNAPSE_INIT]', '[SCANN_LOGISTICS_HUB]', '[CALC_ROI_MARGIN]', '[SYNTHESIZING_RESPONSE]'][Math.floor(Date.now() / 1000) % 4]}
-                                </div>
+                            <div style={{
+                                padding: '10px 14px',
+                                background: '#fff',
+                                borderRadius: '16px',
+                                border: '1px solid #e2e8f0',
+                                alignSelf: 'flex-start',
+                                display: 'flex',
+                                gap: '4px'
+                            }}>
+                                <div className="pulse-ai" style={{ width: '5px', height: '5px', background: 'var(--text-muted)', borderRadius: '50%' }}></div>
+                                <div className="pulse-ai" style={{ width: '5px', height: '5px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '0.2s' }}></div>
+                                <div className="pulse-ai" style={{ width: '5px', height: '5px', background: 'var(--text-muted)', borderRadius: '50%', animationDelay: '0.4s' }}></div>
                             </div>
                         )}
                     </div>
 
-                    {/* Input Area - Floating Dock */}
-                    <div style={{ padding: '1.5rem', background: 'linear-gradient(0deg, rgba(0,0,0,0.4) 0%, transparent 100%)' }}>
+                    {/* Input Area */}
+                    <div style={{ padding: '1rem', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
                         <div style={{
-                            display: 'flex', gap: '10px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '16px', padding: '8px',
-                            boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)',
-                            transition: 'border-color 0.2s'
-                        }}
-                            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
-                            onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-                        >
+                            display: 'flex', gap: '8px',
+                            background: '#f1f5f9',
+                            borderRadius: '12px', padding: '6px'
+                        }}>
                             <input
                                 type="text"
-                                placeholder="Digite seu comando..."
+                                placeholder="Envie sua mensagem..."
                                 value={input}
-                                autoFocus
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                                 style={{
                                     flex: 1,
                                     background: 'transparent',
                                     border: 'none',
-                                    padding: '10px 14px',
-                                    color: '#fff',
-                                    fontWeight: '500',
-                                    fontSize: '0.95rem',
-                                    outline: 'none',
-                                    fontFamily: 'inherit'
+                                    padding: '8px 12px',
+                                    color: 'var(--foreground)',
+                                    fontSize: '0.9rem',
+                                    outline: 'none'
                                 }}
                             />
                             <button
                                 onClick={handleSend}
-                                disabled={isTyping}
-                                className="btn-cyber"
+                                disabled={isTyping || !input.trim()}
                                 style={{
-                                    width: '42px',
-                                    height: '42px',
-                                    borderRadius: '12px',
-                                    padding: 0,
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '8px',
+                                    background: input.trim() ? 'var(--primary)' : '#cbd5e1',
+                                    border: 'none',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    opacity: input.trim() ? 1 : 0.5,
-                                    transform: input.trim() ? 'scale(1)' : 'scale(0.95)',
-                                    transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s'
                                 }}
                             >
-                                <Send size={18} color="#fff" style={{ marginLeft: input.trim() ? '2px' : 0 }} />
+                                <Send size={18} />
                             </button>
-                        </div>
-                        <div style={{ textAlign: 'center', marginTop: '10px' }}>
-                            <span style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                Powered by Apex Neural Link
-                            </span>
                         </div>
                     </div>
                 </div>

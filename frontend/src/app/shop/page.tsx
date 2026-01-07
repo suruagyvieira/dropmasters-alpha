@@ -31,10 +31,10 @@ export default async function ShopPage() {
         <div className="container section">
             <div style={{ marginBottom: '4rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
                 <div className="animate-fade-in">
-                    <h1 style={{ marginBottom: '1rem' }}>Quantum Catalog</h1>
-                    <p style={{ color: 'var(--text-muted)', maxWidth: '600px' }}>
-                        Nodos sincronizados em tempo real com a rede Quantum 2026. <br />
-                        <span style={{ color: 'var(--secondary)', fontSize: '0.8rem' }}>● Sincronização Estática Ativa (SSG)</span>
+                    <h1 style={{ marginBottom: '0.5rem' }}>Catálogo de Ofertas</h1>
+                    <p style={{ color: 'var(--text-muted)', maxWidth: '600px', fontSize: '1.1rem' }}>
+                        Produtos selecionados com envio imediato e garantia total. <br />
+                        <span style={{ color: 'var(--success)', fontSize: '0.85rem', fontWeight: 'bold' }}>● Estoque Disponível no Brasil</span>
                     </p>
                 </div>
             </div>

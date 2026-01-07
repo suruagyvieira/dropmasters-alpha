@@ -27,9 +27,11 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
     const optimizedImage = image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop';
 
     // Motor de Escassez e Prova Social (Gatilhos de Compra)
-    const stockCount = Math.floor(Math.random() * 5) + 3;
-    const viewsCount = Math.floor(Math.random() * 40) + 12;
-    const buyersCount = Math.floor(Math.random() * 15) + 5;
+    // Estabilizador de Prova Social (Garante que os números não mudem a cada hover)
+    const seed = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const stockCount = (seed % 5) + 3;
+    const viewsCount = (seed % 40) + 12;
+    const buyersCount = (seed % 15) + 5;
 
     // Metadados do Modelo de Negócio Apex (v14.0)
     const businessModel = metadata?.business_model || 'DROPSHIPPING';
@@ -44,123 +46,92 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
             addToCart({
                 id, name, price, image: optimizedImage, quantity: 1,
                 metadata: { ...metadata, business_model: businessModel }
-            } as any);
+            });
         }
     };
 
     return (
-        <div className="card-hover glass-premium neural-glow" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', overflow: 'hidden', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ position: 'relative', width: '100%', aspectRatio: '1.2', borderRadius: '18px', overflow: 'hidden', background: '#0a0a0c' }}>
+        <div className="card-hover" style={{
+            padding: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: '16px',
+            background: 'white',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}>
+            <div style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: '12px', overflow: 'hidden', background: '#f1f5f9' }}>
                 <Image
                     src={optimizedImage}
                     alt={name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    style={{ objectFit: 'cover', transition: 'transform 0.5s' }}
+                    style={{ objectFit: 'cover' }}
                     priority={priority}
-                    className="product-image"
                 />
 
-                <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
-                    <div className="glass-premium animate-pulse" style={{ padding: '6px 12px', fontSize: '0.6rem', background: '#ff4d4d', color: 'white', fontWeight: '900', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', border: 'none' }}>
-                        <Flame size={12} fill="white" /> ÚLTIMAS {stockCount} UNID.
+                <div style={{ position: 'absolute', top: '8px', left: '8px', display: 'flex', gap: '6px' }}>
+                    <div className="badge-urgency" style={{ padding: '4px 10px', fontSize: '0.65rem', fontWeight: '700', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Flame size={12} fill="currentColor" /> {stockCount} RESTANTES
                     </div>
                 </div>
 
-                <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', zIndex: 1 }}>
-                    <div className="glass-premium animate-pulse" style={{ padding: '6px 12px', fontSize: '0.65rem', background: businessModel === 'WHITE_LABEL' ? 'var(--primary)' : 'var(--secondary)', color: '#000', fontWeight: '900', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        {businessModel === 'AFFILIATE' ? <Globe size={14} /> : <Truck size={14} />}
+                <div style={{ position: 'absolute', top: '8px', right: '8px' }}>
+                    <div className="badge-primary" style={{ padding: '4px 10px', fontSize: '0.65rem', fontWeight: '700', borderRadius: '6px' }}>
                         {modelTag}
-                    </div>
-                </div>
-
-                <div style={{ position: 'absolute', bottom: '12px', left: '12px', zIndex: 1 }}>
-                    <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.65rem', fontWeight: '800', borderRadius: '8px', background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        #{category}
                     </div>
                 </div>
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff', letterSpacing: '-0.03em' }}>{name}</h3>
-                        {businessModel === 'MARKETPLACE' && (
-                            <span style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: '700', marginTop: '2px' }}>
-                                <Briefcase size={10} style={{ display: 'inline', marginRight: '4px' }} />
-                                Vendido por: {metadata?.vendor_name || 'Parceiro Verificado'}
-                            </span>
-                        )}
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--action)', background: 'rgba(241, 196, 15, 0.1)', padding: '4px 8px', borderRadius: '8px' }}>
-                        <Star size={12} fill="var(--action)" />
-                        <span style={{ fontSize: '0.75rem', color: '#fff', fontWeight: '800' }}>4.9</span>
+                    <div style={{ flex: 1 }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--foreground)', marginBottom: '4px' }}>{name}</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b' }}>
+                                <Star size={12} fill="currentColor" />
+                                <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--foreground)' }}>4.9</span>
+                            </div>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({buyersCount * 3} avaliações)</span>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.8rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '4px 10px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <Users size={12} color="var(--primary)" />
-                        <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: '700' }}>{viewsCount} olhando</span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(34, 197, 94, 0.05)', padding: '4px 10px', borderRadius: '100px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-                        <CheckCircle size={12} color="#22c55e" />
-                        <span style={{ fontSize: '0.65rem', color: '#22c55e', fontWeight: '700' }}>{buyersCount} vendidos</span>
-                    </div>
-                </div>
-
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1rem', fontStyle: description ? 'normal' : 'italic' }}>
-                    {description || "✨ Este produto passa por inspeção neural rigorosa para garantir a melhor experiência em 2026. Importação prioritária com taxa de intermediação zero."}
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4', marginBottom: '0.5rem' }}>
+                    {description || "Produto verificado pela curadoria DropMasters. Garantia de qualidade e envio rastreado para todo o Brasil."}
                 </p>
 
-                {/* Motor de Pressão de Venda (Apex v15.0) */}
-                <div style={{ marginBottom: '1.2rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Flame size={12} className="animate-pulse" /> DISPONIBILIDADE
-                        </span>
-                        <span style={{ fontSize: '0.65rem', fontWeight: '800', color: stockCount < 5 ? '#ff4d4d' : 'var(--text-muted)' }}>
-                            {stockCount} UNIDADES RESTANTES
-                        </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0.5rem 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Users size={12} color="var(--primary)" />
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '500' }}>{viewsCount} interessados</span>
                     </div>
-                    <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{
-                            width: `${(stockCount / 40) * 100}%`,
-                            height: '100%',
-                            background: stockCount < 5 ? 'linear-gradient(90deg, #ff4d4d, #f1c40f)' : 'var(--primary)',
-                            boxShadow: stockCount < 5 ? '0 0 10px #ff4d4d' : '0 0 10px var(--primary-glow)',
-                            transition: 'width 1s ease-in-out'
-                        }}></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <CheckCircle size={12} color="var(--success)" />
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '500' }}>{buyersCount} vendidos</span>
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1rem' }}>
-                    <span style={{ fontSize: '0.6rem', padding: '4px 8px', background: 'rgba(0, 243, 255, 0.05)', borderRadius: '6px', color: 'var(--secondary)', border: '1px solid rgba(0, 243, 255, 0.2)', fontWeight: '900' }}>
-                        🛡️ GARANTIA BLINDADA
-                    </span>
-                    <span style={{ fontSize: '0.6rem', padding: '4px 8px', background: 'rgba(241, 196, 15, 0.05)', borderRadius: '6px', color: 'var(--action)', border: '1px solid rgba(241, 196, 15, 0.2)', fontWeight: '900' }}>
-                        ⚡ DESPACHO 24H
-                    </span>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ marginTop: 'auto', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <div>
                         {original_price && (
-                            <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'line-through' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
                                 R$ {Number(original_price).toFixed(2)}
-                            </span>
+                            </div>
                         )}
-                        <span style={{ fontSize: '1.85rem', fontWeight: '900', color: 'var(--action)', letterSpacing: '-0.05em', filter: 'drop-shadow(0 0 10px rgba(241, 196, 15, 0.2))' }}>
+                        <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--foreground)' }}>
                             R$ {Number(price).toFixed(2)}
-                        </span>
+                        </div>
                     </div>
                     <button
                         className="btn-cyber btn-action"
-                        style={{ width: '56px', height: '56px', borderRadius: '16px' }}
+                        style={{ width: '48px', height: '48px', borderRadius: '12px', padding: 0 }}
                         onClick={handleAction}
-                        title={businessModel === 'AFFILIATE' ? 'Ver na Loja Oficial' : 'Adicionar ao Carrinho'}
                     >
-                        {businessModel === 'AFFILIATE' ? <ExternalLink size={24} /> : <ShoppingCart size={24} />}
+                        {businessModel === 'AFFILIATE' ? <ExternalLink size={20} /> : <ShoppingCart size={20} />}
                     </button>
                 </div>
             </div>

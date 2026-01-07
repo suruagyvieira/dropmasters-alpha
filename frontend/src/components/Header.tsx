@@ -18,65 +18,68 @@ const Header = () => {
     const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     return (
-        <header className="glass" style={{
+        <header style={{
             position: 'fixed',
-            top: '1rem',
-            left: '1rem',
-            right: '1rem',
+            top: 0,
+            left: 0,
+            right: 0,
             zIndex: 1000,
             height: 'var(--header-height)',
+            background: 'white',
+            borderBottom: '1px solid #e2e8f0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 2rem',
+            justifyContent: 'center',
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                <Link href="/" style={{ fontSize: '1.5rem', fontWeight: '800', background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', whiteSpace: 'nowrap' }}>
-                    DROPMASTERS
-                </Link>
-                <nav style={{ display: 'flex', gap: '1.5rem', marginLeft: '2rem' }}>
-                    <Link href="/shop" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Produtos</Link>
-                    <Link href="/rastreio" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Rastreio</Link>
-                    <Link href="/afiliados" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Afiliados</Link>
-                    <Link href="/blog" style={{ fontSize: '0.9rem', fontWeight: '500' }}>Blog</Link>
-                    <Link href="/admin" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--accent)' }}>Admin</Link>
-                </nav>
-            </div>
+            <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+                    <Link href="/" style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--primary)', textDecoration: 'none', letterSpacing: '-0.02em' }}>
+                        DROPMASTERS
+                    </Link>
+                    <nav style={{ display: 'flex', gap: '2rem' }}>
+                        <Link href="/shop" style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--foreground)', textDecoration: 'none' }}>Catálogo</Link>
+                        <Link href="/rastreio" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'none' }}>Rastreio</Link>
+                        <Link href="/afiliados" style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-muted)', textDecoration: 'none' }}>Parceiros</Link>
+                    </nav>
+                </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                <Link href="/cart" style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <ShoppingCart size={22} />
-                    {mounted && isHydrated && cartCount > 0 && (
-                        <span style={{
-                            position: 'absolute',
-                            top: '-8px',
-                            right: '-8px',
-                            background: 'var(--primary)',
-                            color: 'white',
-                            fontSize: '0.65rem',
-                            fontWeight: '800',
-                            padding: '2px 6px',
-                            borderRadius: '50%',
-                            minWidth: '16px',
-                            textAlign: 'center'
-                        }}>
-                            {cartCount}
-                        </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                    <Link href="/cart" style={{ position: 'relative', display: 'flex', alignItems: 'center', color: 'var(--foreground)', textDecoration: 'none' }}>
+                        <ShoppingCart size={24} strokeWidth={1.5} />
+                        {mounted && isHydrated && cartCount > 0 && (
+                            <span style={{
+                                position: 'absolute',
+                                top: '-6px',
+                                right: '-10px',
+                                background: 'var(--primary)',
+                                color: 'white',
+                                fontSize: '0.7rem',
+                                fontWeight: '700',
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    {mounted && (
+                        user ? (
+                            <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--foreground)' }}>
+                                <UserIcon size={22} strokeWidth={1.5} />
+                                <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Minha Conta</span>
+                            </Link>
+                        ) : (
+                            <Link href="/login" className="btn-cyber" style={{ padding: '10px 20px', fontSize: '0.85rem', borderRadius: '8px' }}>
+                                Entrar
+                            </Link>
+                        )
                     )}
-                </Link>
-
-                {mounted && (
-                    user ? (
-                        <Link href="/dashboard" className="glass" style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '10px', textDecoration: 'none' }}>
-                            <UserIcon size={18} color="var(--secondary)" />
-                            <span style={{ fontSize: '0.8rem', fontWeight: '700' }}>PAINEL</span>
-                        </Link>
-                    ) : (
-                        <Link href="/login" className="btn-cyber" style={{ padding: '8px 18px', fontSize: '0.8rem', gap: '8px' }}>
-                            <LogIn size={16} /> LOGIN
-                        </Link>
-                    )
-                )}
+                </div>
             </div>
         </header>
     );

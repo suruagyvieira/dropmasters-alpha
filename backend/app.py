@@ -178,6 +178,7 @@ def living_ai_pivot(force=False):
                 "price": final_price,
                 "description": legend,
                 "stock": random.randint(2, 5) if is_viral else random.randint(10, 20),
+                "is_featured": is_viral,
                 "is_active": True,
                 "updated_at": datetime.datetime.now().isoformat(),
                 "metadata": {
@@ -190,6 +191,12 @@ def living_ai_pivot(force=False):
                 }
             }
             batch.append(update_payload)
+            
+            # Regional Metric Snapshot
+            if loc in AUTONOMY_STATE["regional_metrics"]:
+                AUTONOMY_STATE["regional_metrics"][loc] += 1
+            else:
+                AUTONOMY_STATE["regional_metrics"]["OTHER"] += 1
             
         if batch and supabase:
             supabase.table('products').upsert(batch).execute()
@@ -220,51 +227,70 @@ def health():
 
 @app.route('/api/v2/products', methods=['GET'])
 def get_products():
-    """Performance: Global Cache (900s) com Auto-Refresh."""
+    """Performance: Unified Endpoint (900s Cache) com Filtro de Recomendação."""
     now = time.time()
-    if cache["products"]["data"] and now < cache["products"]["expiry"]:
-        return jsonify(cache["products"]["data"])
+    recommend = request.args.get('recommend') == 'true'
     
-    try:
-        res = supabase.table('products').select("*").eq('is_active', True).order('is_featured', desc=True).execute()
-        processed = []
-        for p in res.data:
-            price = float(p.get('price', 0))
-            # Garantia de Intermediador: Calcula margem mínima de 35% caso base_price falte
-            base_price = float(p.get('base_price') or (price * 0.65))
-            
-            processed.append({
-                "id": p['id'], 
-                "name": p['name'], 
-                "price": price,
-                "base_price": base_price,
-                "description": p.get('description', ''),
-                "image_url": p['image_url'], 
-                "stock": p.get('stock', 10),
-                "original_price": float(price * 2.1),
-                "location": (p.get('metadata') or {}).get('location', 'SP'),
-                "metadata": p.get('metadata', {}),
-                "ai_mood": AUTONOMY_STATE["ai_mood"]
-            })
+    # 1. Tenta Cache Global
+    data_source = cache["products"]["data"]
+    if not data_source or now >= cache["products"]["expiry"]:
+        try:
+            res = supabase.table('products').select("*").eq('is_active', True).order('is_featured', desc=True).execute()
+            data_source = []
+            for p in res.data:
+                price = float(p.get('price', 0))
+                base_price = float(p.get('base_price') or (price * 0.65))
+                meta = p.get('metadata') or {}
+                data_source.append({
+                    "id": p['id'], 
+                    "name": p['name'], 
+                    "price": price,
+                    "base_price": base_price,
+                    "description": p.get('description', ''),
+                    "image_url": p['image_url'], 
+                    "stock": p.get('stock', 10),
+                    "original_price": float(price * 2.1),
+                    "location": meta.get('location', 'SP'),
+                    "is_viral": meta.get('is_viral', False),
+                    "demand_score": meta.get('demand_score', 0),
+                    "metadata": meta,
+                    "ai_mood": AUTONOMY_STATE["ai_mood"],
+                    "is_featured": p.get('is_featured', False)
+                })
+            with autonomy_lock:
+                cache["products"]["data"] = data_source
+                cache["products"]["expiry"] = now + 900
+        except: 
+            return jsonify([])
+
+    # 2. Filtra se necessário (Economia de banda + processamento)
+    if recommend:
+        data_source = [p for p in data_source if p.get('is_featured') or p.get('price') > 150]
         
-        with autonomy_lock:
-            cache["products"]["data"] = processed
-            cache["products"]["expiry"] = now + 900
-        return jsonify(processed)
-    except: return jsonify([])
+    return jsonify(data_source)
+
+# Cache de Sourcing (Economia de CPU/Scrape)
+SOURCING_CACHE = {}
 
 @app.route('/api/v2/sourcing/estimate', methods=['POST'])
 def estimate_sourcing():
-    """Apex Sourcing: Estima preço de itens fora do catálogo."""
+    """Apex Sourcing: Estima preço com cache de 24h para queries idênticas."""
     from support_engine import CustomSourcingEngine
     data = request.json
-    query = data.get('query', '')
+    query = data.get('query', '').lower().strip()
     link = data.get('link', '')
     
     if not query:
         return jsonify({"error": "Query is required"}), 400
-        
+
+    cache_key = f"{query}_{link}"
+    if cache_key in SOURCING_CACHE:
+        expiry, result = SOURCING_CACHE[cache_key]
+        if time.time() < expiry:
+            return jsonify(result)
+            
     result = CustomSourcingEngine.estimate_custom_price(query, link)
+    SOURCING_CACHE[cache_key] = (time.time() + 86400, result) # Cache de 1 dia
     return jsonify(result)
 
 @app.route('/api/v2/payments/callback', methods=['POST'])
@@ -286,15 +312,24 @@ def payment_callback():
                     return jsonify({"status": "already_processed"})
 
                 metadata = order.get('metadata') or {}
-                vendor_split = metadata.get('vendor_payout', 0)
-                profit = metadata.get('platform_net', 0)
+                vendor_split = float(metadata.get('vendor_payout') or (order.get('total', 0) * 0.60))
+                profit = float(metadata.get('platform_net') or (order.get('total', 0) * 0.40))
+                
+                is_priority = metadata.get('payout_priority') == 'high'
+                region_focus = metadata.get('region_focus', [])
                 
                 # State Update First (Security Guard)
                 supabase.table('orders').update({
                     'status': 'paid', 'paid_at': datetime.datetime.now().isoformat()
                 }).eq('transaction_id', txn_id).execute()
                 
-                add_log(f"💰 PAYOUT: TX {txn_id} | Vendor R$ {vendor_split} | Profit R$ {profit}", "revenue")
+                # Feedback Regional e de Prioridade
+                p_tag = "🚀 [PRIORITÁRIO]" if is_priority else "📍 [REGIONAL]"
+                for region in region_focus:
+                    if region in AUTONOMY_STATE["regional_metrics"]:
+                        AUTONOMY_STATE["regional_metrics"][region] += 10 # Boost de peso por venda
+                
+                add_log(f"💰 PAYOUT {p_tag}: TX {txn_id} | Vendor R$ {vendor_split:.2f} | Profit R$ {profit:.2f}", "revenue")
 
                 def _finalize(target_order, target_txn, target_split):
                     # Autopilot Interno

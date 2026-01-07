@@ -46,31 +46,25 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
         if (initialProducts.length === 0) {
             syncRealData();
         }
-
-        // Fetch High Yield recommendations separately for the top section
-        fetchHighYield();
-    }, []);
+    }, [initialProducts.length]);
 
     const syncRealData = async () => {
         try {
+            // Fetch everything in one go - Apex Performance
             const data = await fetchApi('/api/v2/products');
             if (Array.isArray(data)) {
                 setProducts(data);
                 setFullCatalog(data);
+
+                // Extract recommendations from the same data source (save 1 HTTP request)
+                const recommendations = data.filter((p: any) => p.is_featured || p.price > 150).slice(0, 4);
+                setHighYieldProducts(recommendations);
+
                 setError(null);
             }
         } catch (err) {
             setError("Link Bio-Neural instável");
         }
-    };
-
-    const fetchHighYield = async () => {
-        try {
-            const data = await fetchApi('/api/v2/products?recommend=true');
-            if (Array.isArray(data)) {
-                setHighYieldProducts(data);
-            }
-        } catch (e) { }
     };
 
     // AI Evidence Loop (Social Proof for Conversion)
@@ -152,6 +146,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     useEffect(() => {
         if (!mounted || !searchTerm) {
             if (mounted && !searchTerm) {
+                // Return to original state when search is cleared
                 setProducts(fullCatalog);
                 setSearchSource(null);
                 setSearchMessage('');
@@ -540,62 +535,59 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             {products.length > 0 && (
                 <div className="glass shadow-premium" style={{
                     marginBottom: '2.5rem',
-                    padding: '1.5rem 2rem',
-                    borderRadius: '24px',
-                    background: 'rgba(5, 5, 10, 0.4)',
-                    border: '1px solid rgba(139, 92, 246, 0.1)',
+                    padding: '1.25rem 2rem',
+                    borderRadius: '16px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
-                    gap: '1.5rem'
+                    gap: '1.5rem',
+                    border: '1px solid #e2e8f0'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div className="pulse-ai" style={{
-                            width: '48px', height: '48px',
-                            background: 'var(--primary)',
-                            borderRadius: '14px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 0 20px var(--primary-glow)'
+                        <div style={{
+                            width: '40px', height: '40px',
+                            background: 'var(--success)',
+                            borderRadius: '50%',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
                         }}>
-                            <BrainCircuit size={24} color="#fff" />
+                            <CheckCircle size={20} color="#fff" />
                         </div>
                         <div>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--secondary)', fontWeight: '900', letterSpacing: '2px', marginBottom: '2px' }}>NEURAL INTELLIGENCE CORE</div>
-                            <h3 style={{ fontSize: '1.1rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                MODO: {products[0]?.ai_mood?.toUpperCase() || 'APEX'}
-                                <span className="pulse-ai" style={{ width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%' }}></span>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', marginBottom: '2px' }}>VENDEDOR VERIFICADO</div>
+                            <h3 style={{ fontSize: '1rem', fontWeight: '700', margin: 0 }}>
+                                Compra Segura & Entrega Rápida
                             </h3>
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '2rem', flex: 1, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '4px' }}>PRECIFICAÇÃO DINÂMICA</div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--action)' }}>ATIVA | {new Date().toLocaleTimeString()}</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600', marginBottom: '2px' }}>DESPACHO</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--success)' }}>EM ATÉ 24 HORAS</div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '4px' }}>LOGÍSTICA PREVENTIVA</div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#22c55e' }}>HUB SP-SC ONLINE</div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '600', marginBottom: '2px' }}>GARANTIA</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--primary)' }}>7 DIAS PARA DEVOLUÇÃO</div>
                         </div>
                     </div>
                 </div>
             )}
 
             {error && (
-                <div className="glass" style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="glass" style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ef4444', background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <ShieldCheck size={20} />
-                    <span style={{ fontSize: '0.8rem', fontWeight: '800' }}>SISTEMA EM MODO SEGURANÇA: {error}</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>Atenção: {error}</span>
                 </div>
             )}
 
-            <div style={{ marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ marginBottom: '2.5rem' }}>
+                <h2 style={{ fontSize: '1.75rem', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <Sparkles size={24} color="var(--primary)" />
-                    Nodos de Alta Conversão
+                    Produtos em Destaque
                 </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-                    Nossa IA detectou comportamento anormal de interesse nestes produtos. Prioridade de entrega ativada.
+                <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '2rem' }}>
+                    Confira as ofertas mais populares e com maior índice de satisfação nesta semana.
                 </p>
             </div>
 
@@ -612,8 +604,8 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 )}
 
                 <div className="grid-main" style={{ opacity: isSearching ? 0.3 : 1, transition: 'opacity 0.3s' }}>
-                    {products.length > 0 ? (
-                        products.map((product, index) => (
+                    {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product, index) => (
                             <div key={product.id} style={{ position: 'relative' }}>
                                 {/* Badges e Cards existentes */}
                                 <div style={{ position: 'absolute', top: '-10px', left: '20px', zIndex: 10, display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
