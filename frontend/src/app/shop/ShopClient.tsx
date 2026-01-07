@@ -28,6 +28,11 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     const [sourcingQuery, setSourcingQuery] = useState('');
     const [sourcingResult, setSourcingResult] = useState<any>(null);
     const [isSourcing, setIsSourcing] = useState(false);
+    // Novos estados para busca rápida e feedback ao usuário
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchSource, setSearchSource] = useState<'flash' | 'internal' | 'none' | 'local' | null>(null);
+    const [searchMessage, setSearchMessage] = useState('');
     const [isPending, startTransition] = useTransition();
     const { addToCart } = useCart();
     const searchParams = useSearchParams();
@@ -99,10 +104,29 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
         return () => clearInterval(interval);
     }, []);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchSource, setSearchSource] = useState<'flash' | 'internal' | 'none' | null>(null);
-    const [searchMessage, setSearchMessage] = useState('');
+    const nameIndex = useMemo(() => {
+        const map: Record<string, any> = {};
+        fullCatalog.forEach(p => {
+            const key = p.name?.toLowerCase();
+            if (key) map[key] = p;
+        });
+        return map;
+    }, [fullCatalog]);
+
+    // Busca local antes de disparar API
+    useEffect(() => {
+        if (!searchTerm) return;
+        const term = searchTerm.trim().toLowerCase();
+        if (nameIndex[term]) {
+            // Produto encontrado localmente – resposta instantânea
+            setProducts([nameIndex[term]]);
+            setFullCatalog([nameIndex[term]]);
+            setSearchSource('local');
+            setSearchMessage('🧠 Produto encontrado no catálogo local');
+            return;
+        }
+        // Caso não exista localmente, continua com debounce (mantido abaixo)
+    }, [searchTerm, nameIndex]);
     const [geoInfo, setGeoInfo] = useState<{ city: string, region: string } | null>(null);
 
     // ⚡ FLASH SEARCH: Busca instantânea em fornecedores globais
@@ -114,6 +138,11 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 setSearchMessage('');
                 setGeoInfo(null);
             }
+            return;
+        }
+        // Se a busca local já encontrou o produto, não dispara a busca global
+        if (searchSource === 'local') {
+            // Mantém resultados já definidos pela busca local
             return;
         }
 
