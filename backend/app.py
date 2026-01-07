@@ -166,18 +166,25 @@ def living_ai_pivot(force=False):
             # Legenda Agressiva Neural Baseada no Modelo
             legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], model_info)
 
-            # Update critical fields + Model Info
+            # Motor de Pressão Apex (v15.0)
+            d_score = int(random.uniform(85, 99)) if sup_pressure > 0.6 else int(random.uniform(40, 80))
+            is_viral = d_score > 90
+
+            # Update critical fields + Model Info + Pressure
             update_payload = {
                 "id": p['id'],
                 "price": final_price,
                 "description": legend,
-                "stock": random.randint(2, 6) if sup_pressure > 0.7 else random.randint(10, 20),
+                "stock": random.randint(2, 5) if is_viral else random.randint(10, 20),
+                "is_active": True,
                 "updated_at": datetime.datetime.now().isoformat(),
                 "metadata": {
                     **(p.get('metadata') or {}),
                     "business_model": model_info['model'],
                     "model_tag": model_info['tag'],
-                    "strategy": model_info['strategy']
+                    "strategy": model_info['strategy'],
+                    "demand_score": d_score,
+                    "is_viral": is_viral
                 }
             }
             batch.append(update_payload)

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users, Globe, Briefcase } from 'lucide-react';
+import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users, Globe, Briefcase, CheckCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import Image from 'next/image';
 
@@ -98,19 +98,41 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#2ecc71', fontSize: '0.65rem', fontWeight: '800' }}>
-                        <Users size={12} /> {buyersCount} COMPRARAM HOJE
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '4px 10px', borderRadius: '100px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Users size={12} color="var(--primary)" />
+                        <span style={{ fontSize: '0.65rem', color: '#fff', fontWeight: '700' }}>{viewsCount} olhando</span>
                     </div>
-                    <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }}></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: '700' }}>
-                        <Clock size={12} /> {viewsCount} VENDO AGORA
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(34, 197, 94, 0.05)', padding: '4px 10px', borderRadius: '100px', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
+                        <CheckCircle size={12} color="#22c55e" />
+                        <span style={{ fontSize: '0.65rem', color: '#22c55e', fontWeight: '700' }}>{buyersCount} vendidos</span>
                     </div>
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1rem', fontStyle: description ? 'normal' : 'italic' }}>
                     {description || "✨ Este produto passa por inspeção neural rigorosa para garantir a melhor experiência em 2026. Importação prioritária com taxa de intermediação zero."}
                 </p>
+
+                {/* Motor de Pressão de Venda (Apex v15.0) */}
+                <div style={{ marginBottom: '1.2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Flame size={12} className="animate-pulse" /> DISPONIBILIDADE
+                        </span>
+                        <span style={{ fontSize: '0.65rem', fontWeight: '800', color: stockCount < 5 ? '#ff4d4d' : 'var(--text-muted)' }}>
+                            {stockCount} UNIDADES RESTANTES
+                        </span>
+                    </div>
+                    <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{
+                            width: `${(stockCount / 40) * 100}%`,
+                            height: '100%',
+                            background: stockCount < 5 ? 'linear-gradient(90deg, #ff4d4d, #f1c40f)' : 'var(--primary)',
+                            boxShadow: stockCount < 5 ? '0 0 10px #ff4d4d' : '0 0 10px var(--primary-glow)',
+                            transition: 'width 1s ease-in-out'
+                        }}></div>
+                    </div>
+                </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.6rem', padding: '4px 8px', background: 'rgba(0, 243, 255, 0.05)', borderRadius: '6px', color: 'var(--secondary)', border: '1px solid rgba(0, 243, 255, 0.2)', fontWeight: '900' }}>

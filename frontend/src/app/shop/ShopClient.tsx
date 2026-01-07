@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useTransition } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { fetchApi } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
-import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe } from 'lucide-react';
+import { Zap, BrainCircuit, ShieldCheck, RefreshCw, Star, Clock, TrendingUp, Search, Sparkles, MessageSquare, CheckCircle, X, DollarSign, Globe, MapPin } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 import { Product } from '@/lib/products';
@@ -28,6 +28,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     const [sourcingQuery, setSourcingQuery] = useState('');
     const [sourcingResult, setSourcingResult] = useState<any>(null);
     const [isSourcing, setIsSourcing] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const { addToCart } = useCart();
     const searchParams = useSearchParams();
 
@@ -129,6 +130,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
                 if (response?.products && response.products.length > 0) {
                     setProducts(response.products);
+                    setFullCatalog(response.products); // Persistência Apex
                     setSearchSource('flash');
                     setSearchMessage(`⚡ ${response.products.length} produto(s) disponíveis para venda IMEDIATA`);
 
@@ -208,6 +210,19 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
     return (
         <>
+            {geoInfo && (
+                <div className="glass-premium animate-fade-in" style={{
+                    position: 'fixed', top: '100px', right: '20px', zIndex: 999,
+                    padding: '8px 15px', display: 'flex', alignItems: 'center', gap: '10px',
+                    borderColor: 'var(--primary)', background: 'rgba(0,0,0,0.8)'
+                }}>
+                    <MapPin size={14} color="var(--primary)" />
+                    <span style={{ fontSize: '0.65rem', fontWeight: '900', color: '#fff' }}>
+                        LOGÍSTICA OTIMIZADA PARA: {geoInfo.city.toUpperCase()} ({geoInfo.region})
+                    </span>
+                </div>
+            )}
+
             {mounted && evidence && (
                 <div className="glass shadow-premium animate-slide-up" style={{
                     position: 'fixed', bottom: '20px', left: '20px', zIndex: 999,
