@@ -165,6 +165,8 @@ def living_ai_pivot(force=False):
             
             # Legenda Agressiva Neural Baseada no Modelo
             legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], model_info)
+            
+            final_price = round(base * multiplier * loc_adj, 2) + 0.99
 
             # Motor de Pressão Apex (v15.0)
             d_score = int(random.uniform(85, 99)) if sup_pressure > 0.6 else int(random.uniform(40, 80))
