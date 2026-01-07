@@ -23,6 +23,9 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
     const [mounted, setMounted] = useState(false);
     const [isConciergeOpen, setIsConciergeOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [sourcingQuery, setSourcingQuery] = useState('');
+    const [sourcingResult, setSourcingResult] = useState<any>(null);
+    const [isSourcing, setIsSourcing] = useState(false);
     const searchParams = useSearchParams();
 
     useEffect(() => {
@@ -151,6 +154,23 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
         return () => clearTimeout(delayDebounce);
     }, [searchTerm, mounted, initialProducts]);
+
+    const handleSourcingRequest = async () => {
+        if (!sourcingQuery) return;
+        setIsSourcing(true);
+        try {
+            const result = await fetchApi('/api/v2/sourcing/estimate', {
+                method: 'POST',
+                body: JSON.stringify({ query: sourcingQuery }),
+            });
+            setSourcingResult(result);
+            setError(null);
+        } catch (err) {
+            setError("Falha na análise neural de sourcing");
+        } finally {
+            setIsSourcing(false);
+        }
+    };
 
     return (
         <>
@@ -447,69 +467,102 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 )}
 
                 <div className="grid-main" style={{ opacity: isSearching ? 0.3 : 1, transition: 'opacity 0.3s' }}>
-                    {products.length > 0 ? products.map((product, index) => (
-                        <div key={product.id} style={{ position: 'relative' }}>
-                            {index === 0 && !searchTerm && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '-20px',
-                                    right: '20px',
-                                    zIndex: 20,
-                                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)',
-                                    padding: '6px 15px',
-                                    borderRadius: '100px',
-                                    fontSize: '0.7rem',
-                                    fontWeight: '900',
-                                    color: '#fff',
-                                    boxShadow: '0 10px 20px rgba(139, 92, 246, 0.4)',
-                                    border: '2px solid rgba(255,255,255,0.2)'
-                                }}>
-                                    🔥 ESCOLHA DO CÉREBRO
+                    {products.length > 0 ? (
+                        products.map((product, index) => (
+                            <div key={product.id} style={{ position: 'relative' }}>
+                                {/* Badges e Cards existentes */}
+                                <div style={{ position: 'absolute', top: '-10px', left: '20px', zIndex: 10, display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {product.is_viral && (
+                                        <div className="glass animate-glitch" style={{ padding: '4px 12px', fontSize: '0.65rem', fontWeight: '900', color: 'white', background: 'var(--primary)', borderColor: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 0 15px var(--primary-glow)' }}>
+                                            <Zap size={10} fill="white" /> VIRAL TREND
+                                        </div>
+                                    )}
+                                    {product.demand_score && (
+                                        <div className="glass" style={{ padding: '4px 12px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--secondary)', background: 'rgba(0, 243, 255, 0.1)', borderColor: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <TrendingUp size={10} color="var(--secondary)" /> {product.demand_score}% DEMAND
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            <div style={{ position: 'absolute', top: '-10px', left: '20px', zIndex: 10, display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                {product.is_viral && (
-                                    <div
-                                        className="glass animate-glitch"
-                                        style={{
-                                            padding: '4px 12px', fontSize: '0.65rem', fontWeight: '900', color: 'white',
-                                            background: 'var(--primary)', borderColor: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 0 15px var(--primary-glow)'
-                                        }}
-                                    >
-                                        <Zap size={10} fill="white" /> VIRAL TREND
-                                    </div>
-                                )}
-                                {product.demand_score && (
-                                    <div
-                                        className="glass"
-                                        style={{
-                                            padding: '4px 12px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--secondary)',
-                                            background: 'rgba(0, 243, 255, 0.1)', borderColor: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '4px'
-                                        }}
-                                    >
-                                        <TrendingUp size={10} color="var(--secondary)" /> {product.demand_score}% DEMAND
-                                    </div>
-                                )}
+                                <ProductCard
+                                    id={product.id}
+                                    name={product.name}
+                                    price={product.price}
+                                    description={product.description}
+                                    category={product.category}
+                                    image={product.image_url}
+                                    original_price={product.original_price}
+                                    profit_margin={product.profit_margin}
+                                    metadata={product.metadata}
+                                    priority={index < 4}
+                                />
                             </div>
-                            <ProductCard
-                                id={product.id}
-                                name={product.name}
-                                price={product.price}
-                                description={product.description}
-                                category={product.category}
-                                image={product.image_url}
-                                original_price={product.original_price}
-                                profit_margin={product.profit_margin}
-                                metadata={product.metadata}
-                                priority={index < 4}
-                            />
-                        </div>
-                    )) : !isSearching && (
-                        <div className="glass" style={{ gridColumn: '1/-1', padding: '5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📡</div>
-                            <h3 style={{ marginBottom: '1rem' }}>Nenhum Nodo Sincronizado</h3>
-                            <p style={{ color: 'var(--text-muted)' }}>Tente outro termo ou aguarde a IA re-indexar o catálogo real.</p>
-                        </div>
+                        ))
+                    ) : (
+                        !isSearching && (
+                            <div className="glass shadow-premium animate-fade-in" style={{ gridColumn: '1/-1', padding: '3rem', textAlign: 'center', background: 'rgba(5,5,10,0.8)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ fontSize: '3.5rem', marginBottom: '1.5rem', animation: 'float 3s ease-in-out infinite' }}>🛰️</div>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '1rem', color: '#fff' }}>APEX SMART SOURCING</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '600px', margin: '0 auto 2.5rem', lineHeight: '1.6' }}>
+                                    Não encontrou o que buscava? Nossa IA de intermediação consegue localizar qualquer produto e gerar uma oferta dinâmica para você agora.
+                                </p>
+
+                                <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div className="glass" style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.4)', borderRadius: '16px', border: '1px solid var(--primary)' }}>
+                                        <Globe size={20} color="var(--primary)" style={{ marginLeft: '1rem' }} />
+                                        <input
+                                            type="text"
+                                            placeholder="Link do AliExpress ou Descrição do Produto..."
+                                            style={{ background: 'transparent', border: 'none', color: '#fff', width: '100%', padding: '12px 10px', outline: 'none', fontSize: '0.9rem' }}
+                                            value={sourcingQuery}
+                                            onChange={(e) => setSourcingQuery(e.target.value)}
+                                        />
+                                        <button
+                                            className="btn-cyber"
+                                            style={{ padding: '10px 25px', borderRadius: '12px' }}
+                                            onClick={handleSourcingRequest}
+                                            disabled={isSourcing || !sourcingQuery}
+                                        >
+                                            {isSourcing ? <RefreshCw className="animate-spin" size={18} /> : 'ANALISAR'}
+                                        </button>
+                                    </div>
+
+                                    {sourcingResult && (
+                                        <div className="glass shadow-premium animate-slide-up" style={{ marginTop: '2rem', padding: '2rem', textAlign: 'left', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--secondary)' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.65rem', color: 'var(--secondary)', fontWeight: '900', letterSpacing: '2px', marginBottom: '5px' }}>OFERTA GERADA PELA IA</div>
+                                                    <h4 style={{ fontSize: '1.3rem', fontWeight: '800' }}>{sourcingResult.name}</h4>
+                                                </div>
+                                                <div className="glass-premium" style={{ padding: '6px 12px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid #22c55e', borderRadius: '8px', fontSize: '0.7rem', fontWeight: '900' }}>
+                                                    VIABILIDADE: 100%
+                                                </div>
+                                            </div>
+
+                                            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>{sourcingResult.message}</p>
+
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textDecoration: 'line-through' }}>R$ {(sourcingResult.estimated_price * 1.8).toFixed(2)}</span>
+                                                    <span style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--secondary)' }}>R$ {sourcingResult.estimated_price.toFixed(2)}</span>
+                                                </div>
+                                                <button className="btn-cyber btn-action shadow-secondary" style={{ padding: '15px 40px', borderRadius: '16px', fontWeight: '900' }}>
+                                                    IMPORTAR & COMPRAR AGORA
+                                                </button>
+                                            </div>
+
+                                            <div style={{ marginTop: '1.5rem', display: 'flex', gap: '10px' }}>
+                                                <div className="glass" style={{ padding: '8px 15px', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <Clock size={14} /> ENTREGA EM 7-15 DIAS
+                                                </div>
+                                                <div className="glass" style={{ padding: '8px 15px', fontSize: '0.65rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <ShieldCheck size={14} /> GARANTIA APEX
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )
                     )}
                 </div>
             </div>

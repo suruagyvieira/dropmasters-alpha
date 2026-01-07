@@ -214,6 +214,20 @@ def get_products():
         return jsonify(processed)
     except: return jsonify([])
 
+@app.route('/api/v2/sourcing/estimate', methods=['POST'])
+def estimate_sourcing():
+    """Apex Sourcing: Estima preço de itens fora do catálogo."""
+    from support_engine import CustomSourcingEngine
+    data = request.json
+    query = data.get('query', '')
+    link = data.get('link', '')
+    
+    if not query:
+        return jsonify({"error": "Query is required"}), 400
+        
+    result = CustomSourcingEngine.estimate_custom_price(query, link)
+    return jsonify(result)
+
 @app.route('/api/v2/payments/callback', methods=['POST'])
 def payment_callback():
     """Automação de Repasse & Logística Regional."""

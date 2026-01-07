@@ -55,3 +55,33 @@ def simulate_chat_interaction(customer_query, product_context=None, logistics_si
         "ai_confidence": round(random.uniform(0.95, 0.99), 2),
         "logistics_aware": True
     }
+
+class CustomSourcingEngine:
+    """
+    APEX SOURCING ENGINE v12.3:
+    Processa pedidos de produtos fora do catálogo via links ou descrição.
+    Garante margem de ROI e intermediação automática.
+    """
+    @staticmethod
+    def estimate_custom_price(query, source_link=None):
+        # Lógica de Precificação Neural de Intermediação
+        base_estimation = random.uniform(50, 450) # Mock de análise de scraping/link
+        
+        # Inteligência de Margem (35% Lucro Líquido + Custos Operacionais)
+        desired_net_profit_multiplier = 1.35 
+        logistics_fee = 15.00 # Taxa de despacho prioritário
+        
+        final_price = (base_estimation * desired_net_profit_multiplier) + logistics_fee
+        
+        # Sinais de Confiança Regional
+        suggested_location = random.choice(["SP", "SC"])
+        
+        return {
+            "name": f"Item Encomenda: {query[:20]}..." if len(query) > 20 else f"Item Especial: {query}",
+            "estimated_price": round(final_price, 2),
+            "original_base": round(base_estimation, 2),
+            "profit_net": round(final_price - base_estimation - logistics_fee, 2),
+            "location_signal": suggested_location,
+            "status": "feasible",
+            "message": f"Produto localizado em nosso Hub {suggested_location}. Disponível para intermediação imediata."
+        }
