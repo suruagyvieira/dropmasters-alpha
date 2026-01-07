@@ -61,8 +61,8 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
 
                 {/* LOGISTICS & STATUS BADGES */}
                 <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', zIndex: 1 }}>
-                    <div className="glass-premium" style={{ padding: '6px 12px', fontSize: '0.6rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', background: 'rgba(0,0,0,0.6)', color: 'var(--action)' }}>
-                        <Truck size={12} /> ENVIO IMEDIATO {location || 'HUB SC'}
+                    <div className="glass-premium shadow-secondary" style={{ padding: '6px 12px', fontSize: '0.65rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '10px', background: 'var(--secondary)', color: '#000' }}>
+                        <Truck size={14} /> RECEBA EM 2-5 DIAS
                     </div>
                 </div>
 

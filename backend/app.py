@@ -67,22 +67,22 @@ def admin_required(f):
 WINNER_POOL = [
     {
         "name": "Quantum Ring Pro", "base": 85.0, "cat": "Wearables", "img": "1599643478518-a744c517b203", "trend": 0.95, "loc": "SP",
-        "desc": "O futuro da saúde no seu dedo. Monitoramento neural e biométrico em tempo real.",
+        "desc": "🚀 O futuro da saúde no seu dedo. Monitoramento neural e biométrico em tempo real com precisão de 99%.",
         "benefits": ["Bateria de 7 dias", "Prova d'água 50m", "Análise de sono IA"]
     },
     {
         "name": "Bio-Light Max", "base": 120.0, "cat": "Home", "img": "1534073828943-f801091bb18c", "trend": 0.88, "loc": "SC",
-        "desc": "Iluminação inteligente que sincroniza com seu ritmo circadiano para máxima energia.",
+        "desc": "💡 Iluminação inteligente que sincroniza com seu ritmo circadiano para máxima energia e foco total.",
         "benefits": ["Redução de fadiga", "Sincronia com Apps", "LED de espectro total"]
     },
     {
         "name": "Ultra-Pods Elite", "base": 55.0, "cat": "Audio", "img": "1590658268037-6bf12165a8df", "trend": 0.92, "loc": "PR",
-        "desc": "Áudio espacial imersivo com cancelamento de ruído neural ativo.",
+        "desc": "🎧 Áudio espacial imersivo com cancelamento de ruído neural ativo de última geração.",
         "benefits": ["Som Lossless", "Conexão Multiponto", "40h de autonomia"]
     },
     {
         "name": "Neural-Sleep Mask", "base": 65.0, "cat": "Health", "img": "1512314889339-df833219552d", "trend": 0.98, "loc": "MG",
-        "desc": "Bloqueio total de luz com neuro-estimulação para sono profundo instantâneo.",
+        "desc": "💤 Bloqueio total de luz com neuro-estimulação para sono profundo instantâneo e reparador.",
         "benefits": ["Tecido respirável", "Fones integrados", "App de meditação"]
     }
 ]
