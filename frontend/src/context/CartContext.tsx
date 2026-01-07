@@ -20,7 +20,7 @@ export interface CartItem {
     price: number;
     quantity: number;
     image: string;
-    metadata?: any;
+    metadata?: any; // Flexible metadata for custom items
 }
 
 interface CartContextType {
