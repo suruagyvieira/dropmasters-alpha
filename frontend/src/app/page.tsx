@@ -5,7 +5,7 @@ import { getSupabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { Product, MOCK_PRODUCTS } from '@/lib/products';
 
-// ISR Optimization: Revalidate home page every 30 minutes (Balance between DB load and fresh data)
+// ISR Optimization: Revalidate home page every 30 minutes (Apex v12.1 Force Sync)
 export const revalidate = 1800;
 
 export default async function Home() {
