@@ -98,17 +98,18 @@ WINNER_POOL = [
 ]
 
 def living_ai_pivot(force=False):
+    now = time.time()
     with autonomy_lock:
         if AUTONOMY_STATE["is_syncing"]: return
-        
-        # Throttle: Reduzido para 5 min para maior dinamismo comercial
-        now = time.time()
         if not force and now - AUTONOMY_STATE["last_sync"] < 300 and AUTONOMY_STATE["conversion_count"] == 0:
             return
             
         AUTONOMY_STATE["is_syncing"] = True
         AUTONOMY_STATE["last_sync"] = now
     
+    # Early Exit if Supabase is down (Zero Stock dependency)
+    if not supabase: return
+
     try:
         # 1. Sincronia de Ciclo Omni
         logistics = Autopilot.get_logistics_signals()
@@ -404,25 +405,32 @@ def active_sourcing_search():
     if not found_items:
         return jsonify({"products": [], "message": "Busca global refinada. Tente termos mais genéricos."})
 
+    batch_products = []
     registered_products = []
     m_pressure = analyze_competitive_pressure()
     multiplier = max(1.4, get_predatory_margin(1.0, m_pressure))
 
     for item in found_items:
         try:
-            # Filtro de Robustez: Só aceitamos itens com vibe_score alto (Fornecedores Elite)
             if item['vibe_score'] < 70: continue
 
             check = supabase.table('products').select("id, metadata").eq("name", item['name']).execute()
+            final_price = round(item['price'] * multiplier, 2) + 0.99
+            
+            p_id = None
             if check.data:
                 p_id = check.data[0]['id']
-                final_price = round(item['price'] * multiplier, 2) + 0.99
+                # Se mudou muito o preço, atualiza no batch (Otimização Apex)
+                update_p = {
+                    "id": p_id,
+                    "price": final_price,
+                    "metadata": {**check.data[0]['metadata'], "vibe_score": item['vibe_score']}
+                }
+                batch_products.append(update_p)
             else:
                 p_id = str(uuid.uuid4())
-                # IA VIVA: Geração de Modelo e Copy em tempo real
                 model_info = ApexHybridEngine.select_best_model({"name": item['name']}, m_pressure)
                 legend = ApexLegendGenerator.generate_aggressive_copy(item['name'], model_info)
-                final_price = round(item['price'] * multiplier, 2) + 0.99
 
                 new_p = {
                     "id": p_id,
@@ -443,7 +451,7 @@ def active_sourcing_search():
                         "demand_score": item['vibe_score']
                     }
                 }
-                supabase.table('products').insert(new_p).execute()
+                batch_products.append(new_p)
             
             registered_products.append({
                 "id": p_id,
@@ -455,6 +463,9 @@ def active_sourcing_search():
                 "metadata": {"source": "ActiveApex", "vibe": item['vibe_score']}
             })
         except: continue
+
+    if batch_products:
+        supabase.table('products').upsert(batch_products).execute()
 
     return jsonify({
         "products": registered_products,
