@@ -3,7 +3,7 @@
 import React, { memo } from 'react';
 import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users, Globe, Briefcase, CheckCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import type { CartItem } from '../lib/cartTypes';
+import type { CartItem } from '../lib/cart-item-types';
 import Image from 'next/image';
 
 interface ProductProps {

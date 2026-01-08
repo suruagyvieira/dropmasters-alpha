@@ -5,7 +5,7 @@ import { CheckCircle, Package, ArrowRight, ShoppingBag, Zap, Clock } from 'lucid
 import Link from 'next/link';
 import { fetchApi } from '@/lib/api';
 import { useCart } from '@/context/CartContext';
-import type { CartItem } from '../../lib/cartTypes';
+import type { CartItem } from '../../lib/cart-item-types';
 import Image from 'next/image';
 
 export default function SuccessPage() {
