@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from supabase import create_client, Client
 from competitive_engine import analyze_competitive_pressure, get_predatory_margin, ApexLegendGenerator, ApexHybridEngine
 from support_engine import simulate_chat_interaction, CustomSourcingEngine
+from sourcing_engine import LiveSourcingEngine
 from supplier import Autopilot
 
 load_dotenv()
@@ -100,9 +101,9 @@ def living_ai_pivot(force=False):
     with autonomy_lock:
         if AUTONOMY_STATE["is_syncing"]: return
         
-        # Throttle: Se não houver conversões e o cache for recente, pula sincronia cara de DB
+        # Throttle: Reduzido para 5 min para maior dinamismo comercial
         now = time.time()
-        if not force and now - AUTONOMY_STATE["last_sync"] < 3600 and AUTONOMY_STATE["conversion_count"] == 0:
+        if not force and now - AUTONOMY_STATE["last_sync"] < 300 and AUTONOMY_STATE["conversion_count"] == 0:
             return
             
         AUTONOMY_STATE["is_syncing"] = True
@@ -201,7 +202,43 @@ def living_ai_pivot(force=False):
         if batch and supabase:
             supabase.table('products').upsert(batch).execute()
         
-        add_log(f"🧠 APEX CYCLE: Mood {AUTONOMY_STATE['ai_mood']} | Supply {int(rel*100)}% | Pressure {int(sup_pressure*100)}%", "system")
+        # 5. EXPANSÃO AUTOMÁTICA DE CATÁLOGO (Discovery Mode)
+        # Se tivermos poucos produtos ou a cada X ciclos, buscamos coisa nova na rede
+        product_count = len(res.data or [])
+        if product_count < 40 or random.random() < 0.3:
+            keyword = random.choice(LiveSourcingEngine.get_trending_keywords())
+            add_log(f"🔎 DISCOVERY: Buscando novas tendências para '{keyword}'...", "system")
+            new_items = LiveSourcingEngine.search_mercadolivre(keyword, limit=3)
+            
+            if new_items:
+                discovered = []
+                for item in new_items:
+                    # Evita duplicados básicos por nome
+                    if any(p['name'] == item['name'] for p in res.data or []): continue
+                    
+                    base = item['price']
+                    discovered.append({
+                        "id": str(uuid.uuid4()),
+                        "name": item['name'],
+                        "description": f"Destaque em alta: {item['name']}. Qualidade garantida e envio regional priorizado.",
+                        "base_price": base,
+                        "category": "Intermediação",
+                        "image_url": item['image'],
+                        "price": round(base * multiplier, 2) + 0.99,
+                        "is_active": True,
+                        "is_featured": True,
+                        "metadata": {
+                            "location": item['location'],
+                            "source": "Discovery",
+                            "external_link": item['url'],
+                            "demand_score": random.randint(70, 95)
+                        }
+                    })
+                if discovered:
+                    supabase.table('products').insert(discovered).execute()
+                    add_log(f"✨ EXPANSÃO: {len(discovered)} novos produtos adicionados via Discovery.", "system")
+
+        add_log(f"🧠 APEX CYCLE: Mood {AUTONOMY_STATE['ai_mood']} | Supply {int(rel*100)}% | Pressure {int(sup_pressure*100)}% | Catalog {product_count}", "system")
         
     except Exception as e:
         add_log(f"Pivot Error: {e}", "error")
@@ -290,6 +327,34 @@ def estimate_sourcing():
             return jsonify(result)
             
     result = CustomSourcingEngine.estimate_custom_price(query, link)
+    
+    # ESTRATÉGIA OFF-CATALOG: Se o item é viável, já injetamos no banco como 'Sourcing' 
+    # para que futuros visitantes o achem no catálogo principal.
+    if result.get('status') == 'feasible' and supabase:
+        try:
+            # Verifica se já existe
+            check = supabase.table('products').select("id").eq("name", result['name']).execute()
+            if not check.data:
+                new_p = {
+                    "id": str(uuid.uuid4()),
+                    "name": result['name'],
+                    "description": f"Produto sob encomenda validado pelo assistente: {result['name']}. {result['message']}",
+                    "base_price": result['original_base'],
+                    "price": result['estimated_price'],
+                    "image_url": (result.get('real_data') or {}).get('image') or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
+                    "category": "Encomenda Personalizada",
+                    "is_active": True,
+                    "metadata": {
+                        "location": result['location_signal'],
+                        "is_sourcing": True,
+                        "original_link": link,
+                        "demand_score": 100 # Máxima prioridade (alguém pediu)
+                    }
+                }
+                supabase.table('products').insert(new_p).execute()
+                add_log(f"📥 SOURCING TO CATALOG: '{result['name']}' adicionado ao catálogo global.", "system")
+        except: pass
+
     SOURCING_CACHE[cache_key] = (time.time() + 86400, result) # Cache de 1 dia
     return jsonify(result)
 

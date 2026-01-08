@@ -25,10 +25,10 @@ class LiveSourcingEngine:
         }
 
     @staticmethod
-    def search_mercadolivre(query):
+    def search_mercadolivre(query, limit=5):
         """
         Scrapes Mercado Livre search results for the query.
-        Returns the best match (lowest price within reasonable range).
+        Returns the best matches.
         """
         try:
             # Format query for URL
@@ -42,14 +42,14 @@ class LiveSourcingEngine:
 
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # Select product cards (layout varies, trying common classes)
+            # Select product cards
             results = soup.select('li.ui-search-layout__item')
             if not results:
                 results = soup.select('div.ui-search-result__wrapper')
 
             products = []
             
-            for item in results[:5]: # Analyze top 5
+            for item in results[:limit]: # Limit analysis
                 try:
                     # Extract Title
                     title_elem = item.select_one('.ui-search-item__title') or item.select_one('.poly-component__title')
@@ -69,10 +69,12 @@ class LiveSourcingEngine:
                     # Extract Image
                     img_elem = item.select_one('img.ui-search-result-image__element') or item.select_one('.poly-component__picture')
                     image = img_elem.get('src') if img_elem else None
+                    if not image and img_elem:
+                        image = img_elem.get('data-src') # Lazy loading check
                     
-                    # Extract Location (if available) - Critical for Regional Logic
+                    # Extract Location
                     loc_elem = item.select_one('.ui-search-item__location') or item.select_one('.poly-component__location')
-                    location = loc_elem.get_text().strip() if loc_elem else "SP" # Default to SP if not found (High prob matches hub)
+                    location = loc_elem.get_text().strip() if loc_elem else "SP"
 
                     products.append({
                         "name": title,
@@ -83,20 +85,25 @@ class LiveSourcingEngine:
                         "source": "MercadoLivre"
                     })
                 except Exception as e:
-                    print(f"Error parsing item: {e}")
                     continue
             
-            # Sort by price to find "Supplier Price" (discarding potentially fake cheap items)
-            if products:
-                # Filter outliers (too cheap might be accessories)
-                avg_price = sum(p['price'] for p in products) / len(products)
-                valid_products = [p for p in products if p['price'] > avg_price * 0.3] 
-                
-                if valid_products:
-                    return sorted(valid_products, key=lambda x: x['price'])[0] # Return cheapest valid
+            if not products: return None
             
-            return None
-
+            # Filter and sort
+            avg_price = sum(p['price'] for p in products) / len(products)
+            valid_products = [p for p in products if p['price'] > avg_price * 0.4]
+            
+            return sorted(valid_products, key=lambda x: x['price']) # Return sorted list
+            
         except Exception as e:
             print(f"Scraping Error: {e}")
             return None
+
+    @staticmethod
+    def get_trending_keywords():
+        """Simulates discovery of trending e-commerce terms in BR."""
+        return [
+            "Smartwatch Ultra 9", "Fone Bluetooth Noise Cancelling", 
+            "Projetor Portátil 4K", "Massageador Cervical Elétrico",
+            "Câmera Segurança Wifi Externa", "Mini Ar Condicionado Portátil"
+        ]
