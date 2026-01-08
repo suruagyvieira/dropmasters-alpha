@@ -14,12 +14,16 @@ export async function fetchApi<T = any>(
     options: RequestInit = {},
     timeout: number = DEFAULT_TIMEOUT
 ): Promise<T> {
-    // Server-side URL resolution
+    // Environment-aware URL resolution
+    const PUBLIC_API = process.env.NEXT_PUBLIC_API_URL;
     let baseUrl = '';
+
     if (typeof window === 'undefined') {
-        baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.VERCEL_URL
-            ? `https://${process.env.VERCEL_URL}`
-            : 'http://localhost:3000';
+        // Server-side: Prefer explicit API URL, then fallback to Vercel discovery
+        baseUrl = PUBLIC_API || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    } else {
+        // Client-side: Prefer explicit API URL, otherwise same-origin
+        baseUrl = PUBLIC_API || '';
     }
 
     let delay = 500;

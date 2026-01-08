@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 
 const CITIES = ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Curitiba', 'Porto Alegre', 'Salvador', 'Brasília', 'Fortaleza', 'Recife', 'Manaus', 'Goiânia'];
 const PRODUCTS = [
-    'Fone Bluetooth Neural Alpha',
-    'Smartwatch Vitality 2026',
-    'Mochila Anti-Furto Cyber',
-    'Lâmpada LED RGB Wi-Fi',
-    'Teclado Mecânico Quantum',
-    'Mouse Gamer Predator AI',
-    'Monitor OLED 240Hz'
+    'Fone de Ouvido Noise Cancelling',
+    'Smartwatch Ultra Series',
+    'Mochila Executiva Impermeável',
+    'Lâmpada Inteligente Wi-Fi',
+    'Teclado Mecânico Ergonômico',
+    'Mouse Gamer Alta Precisão',
+    'Monitor Curvo 4K'
 ];
 const NAMES = ['Carlos S.', 'Ana P.', 'Roberto M.', 'Fernanda L.', 'Lucas G.', 'Marina B.', 'Douglas R.', 'Juliana F.', 'Tiago A.', 'Beatriz C.'];
 

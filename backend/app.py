@@ -460,7 +460,7 @@ def neural_maintainer():
     while True:
         try:
             living_ai_pivot()
-            time.sleep(3600) # Ciclo de 1 hora para economia de recursos
+            time.sleep(300) # Ciclo de 5 minutos para dinamismo comercial
         except: time.sleep(60)
 
 threading.Thread(target=neural_maintainer, daemon=True).start()

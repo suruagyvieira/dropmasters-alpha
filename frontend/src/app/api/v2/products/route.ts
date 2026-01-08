@@ -71,16 +71,17 @@ export async function GET(request: Request) {
         // Non-blocking seed (doesn't delay response)
         ensureSeeded();
 
-        // OPTIMIZED QUERY: Select only needed columns, add limit
+        // OPTIMIZED QUERY: Select all to catch Apex Metadata (Mood, Model, Strategy)
         let query = supabase
             .from('products')
-            .select('id, name, price, description, category, image_url, demand_score, is_viral, original_price')
+            .select('*')
             .eq('is_active', true)
+            .order('is_featured', { ascending: false })
             .limit(limit);
 
         // Search with sanitized input
         if (search && search.length >= 2) {
-            const sanitized = search.replace(/[%_]/g, ''); // Prevent SQL pattern injection
+            const sanitized = search.replace(/[%_]/g, '');
             query = query.or(`name.ilike.%${sanitized}%,description.ilike.%${sanitized}%`);
         }
 
@@ -91,29 +92,34 @@ export async function GET(request: Request) {
             throw queryError;
         }
 
-        // LOG DE DEMANDA (Non-blocking - Fire and forget)
+        // LOG DE DEMANDA (Non-blocking)
         if (search && (!products || products.length === 0)) {
             void supabase.from('logs').insert({
                 type: 'demand_miss',
-                message: `🔍 OPORTUNIDADE: Busca sem resultado para "${search}". Considerar sourcing.`,
+                message: `🔍 OPORTUNIDADE: "${search}". Sourcing sugerido.`,
                 created_at: new Date().toISOString()
             });
         }
 
-
         // CAMADA DE INTELIGÊNCIA (ANÁLISE PREDITIVA)
-        const analyzedProducts = (products || []).map((product: Product) => {
-            const analyzed = SmartInventoryPredictor.analyze(product);
+        const analyzedProducts = (products || []).map((product: any) => {
+            const meta = product.metadata || {};
             return {
-                ...analyzed,
-                estimated_profit: Number((product.price * 0.45).toFixed(2)) // 45% margin
+                ...product,
+                // Garantindo compatibilidade com frontend ShopClient
+                original_price: product.original_price || (product.price * 1.5),
+                demand_score: product.demand_score || meta.demand_score || 0,
+                is_viral: product.is_viral || meta.is_viral || false,
+                business_model: meta.business_model || 'DROPSHIPPING',
+                location: meta.location || 'SP',
+                estimated_profit: product.estimated_profit || Number((product.price * 0.40).toFixed(2))
             };
         });
 
-        // Response with Edge Cache headers
+        // Response with Edge Cache (Aggressive for performance)
         return NextResponse.json(analyzedProducts, {
             headers: {
-                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30',
+                'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=150',
             },
         });
 
