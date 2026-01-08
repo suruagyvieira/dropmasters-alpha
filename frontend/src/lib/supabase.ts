@@ -8,21 +8,16 @@ const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build' || proc
 
 // Validation helper
 const isValidSupabaseConfig = (url: string | undefined, key: string | undefined): boolean => {
-    // Check if it's a valid URL and not a common placeholder
     if (!url || !key) return false;
     if (url.includes('YOUR_SUPABASE_URL') || url === '') return false;
     return url.startsWith('http');
 };
 
-// Lazy initialization to avoid build-time errors when env vars are not set
+// Lazy initialization
 let supabaseInstance: SupabaseClient | null = null;
 
 export const getSupabase = (): SupabaseClient | null => {
-    // Fail silently during build if config is missing to allow SSG fallback
     if (!isValidSupabaseConfig(supabaseUrl, supabaseAnonKey)) {
-        if (process.env.NODE_ENV === 'development' && !isBuildPhase) {
-            console.warn('Supabase credentials not configured or invalid. URL must start with http/https.');
-        }
         return null;
     }
 
@@ -30,7 +25,9 @@ export const getSupabase = (): SupabaseClient | null => {
         try {
             supabaseInstance = createClient(supabaseUrl as string, supabaseAnonKey as string, {
                 auth: {
-                    persistSession: false // Critical for SSR/Vercel performance
+                    persistSession: true, // Habilitado para manter login no navegador
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
                 }
             });
         } catch (error) {
@@ -44,5 +41,11 @@ export const getSupabase = (): SupabaseClient | null => {
 
 // For backwards compatibility
 export const supabase = isValidSupabaseConfig(supabaseUrl, supabaseAnonKey)
-    ? createClient(supabaseUrl as string, supabaseAnonKey as string, { auth: { persistSession: false } })
+    ? createClient(supabaseUrl as string, supabaseAnonKey as string, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    })
     : null;
