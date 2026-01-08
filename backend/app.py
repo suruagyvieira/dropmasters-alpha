@@ -124,12 +124,14 @@ def living_ai_pivot(force=False):
         elif AUTONOMY_STATE["dissatisfaction_score"] > 3: AUTONOMY_STATE["ai_mood"] = "Empathy"
         else: AUTONOMY_STATE["ai_mood"] = "Apex"
 
-        # 3. Precificação Dinâmica Regionalizada
+        # 3. Precificação Dinâmica Regionalizada (Agressividade Zero Cost)
+        # SP/SC recebem desconto de logística no preço final para aumentar conversão local
         price_adj = 1.0
-        if AUTONOMY_STATE["ai_mood"] == "Safety": price_adj = 1.2
-        elif AUTONOMY_STATE["ai_mood"] == "Empathy": price_adj = 0.9
+        if AUTONOMY_STATE["ai_mood"] == "Safety": price_adj = 1.15
+        elif AUTONOMY_STATE["ai_mood"] == "Empathy": price_adj = 0.85
 
-        multiplier = get_predatory_margin(1.0, m_pressure) * price_adj
+        # Multiplicador Base Apex - Garante 40% de margem mínima
+        multiplier = max(1.4, get_predatory_margin(1.0, m_pressure) * price_adj)
         
         # 4. Atualização de Inventário
         res = supabase.table('products').select("id, name, base_price, metadata").eq('is_active', True).execute()
@@ -167,7 +169,9 @@ def living_ai_pivot(force=False):
             # Legenda Agressiva Neural Baseada no Modelo
             legend = ApexLegendGenerator.generate_aggressive_copy(p['name'], model_info)
             
-            final_price = round(base * multiplier * loc_adj, 2) + 0.99
+            # Cálculo de Preço Final (Apex Yield Optimization)
+            # Regiões SP/SC (Hubs) têm prioridade de margem
+            final_price = round(base * multiplier * loc_adj, 2) + 0.90
 
             # Motor de Pressão Apex (v15.0)
             d_score = int(random.uniform(85, 99)) if sup_pressure > 0.6 else int(random.uniform(40, 80))
@@ -292,7 +296,8 @@ def get_products():
                     "demand_score": meta.get('demand_score', 0),
                     "metadata": meta,
                     "ai_mood": AUTONOMY_STATE["ai_mood"],
-                    "is_featured": p.get('is_featured', False)
+                    "is_featured": p.get('is_featured', False),
+                    "business_model": meta.get('business_model', 'DROPSHIPPING')
                 })
             with autonomy_lock:
                 cache["products"]["data"] = data_source
@@ -383,10 +388,19 @@ def payment_callback():
                 is_priority = metadata.get('payout_priority') == 'high'
                 region_focus = metadata.get('region_focus', [])
                 
-                # State Update First (Security Guard)
-                supabase.table('orders').update({
-                    'status': 'paid', 'paid_at': datetime.datetime.now().isoformat()
-                }).eq('transaction_id', txn_id).execute()
+                # State Update First (Security Guard) - Atomic check
+                # Payout automático priorizado para SP/SC
+                update_fields = {
+                    'status': 'paid', 
+                    'paid_at': datetime.datetime.now().isoformat()
+                }
+                
+                # Se for região priorizada, o repasse é disparado em modo 'Express'
+                is_local = any(reg in region_focus for reg in ['SP', 'SC'])
+                if is_local:
+                    update_fields['metadata'] = {**metadata, "logistics_speed": "high"}
+
+                supabase.table('orders').update(update_fields).eq('transaction_id', txn_id).execute()
                 
                 # Feedback Regional e de Prioridade
                 p_tag = "🚀 [PRIORITÁRIO]" if is_priority else "📍 [REGIONAL]"

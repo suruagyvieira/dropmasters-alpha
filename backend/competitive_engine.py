@@ -119,10 +119,10 @@ class ApexLegendGenerator:
         }
         
         general_solutions = [
-            "🛡️ INSPEÇÃO NEURAL: Cada unidade passa por triagem robótica em nosso Hub.",
-            "💰 TAXA ZERO: Intermediação direta para garantir o melhor preço do Brasil.",
-            "🔄 GARANTIA BLINDADA: Nós assumimos o risco. Satisfação ou retorno imediato.",
-            "🛰️ ESTOQUE VIRTUAL: Sincronizado em tempo real. Se está aqui, é seu."
+            "🛡️ CONTROLE DE QUALIDADE: Cada unidade passa por triagem em nosso Hub Regional.",
+            "💰 PREÇO DIRETO: Intermediação otimizada para garantir o custo real de fornecedor.",
+            "🔄 GARANTIA TOTAL: Nós assumimos o risco. Satisfação ou retorno imediato.",
+            "🛰️ ESTOQUE INTEGRADO: Sincronizado em tempo real com fornecedores nacionais."
         ]
         
         selected_hook = model_hooks.get(model, model_hooks["DROPSHIPPING"])
@@ -139,10 +139,13 @@ def analyze_competitive_pressure():
     return pressure
 
 def get_predatory_margin(supplier_price, market_pressure):
+    # Lógica de Margem Estável (E-commerce Profissional)
+    # Garante sustentabilidade: Alta pressão -> margem segura (1.8x a 2.2x)
+    # Baixa pressão -> margem otimizada (2.2x a 3.5x)
     if market_pressure > 0.8:
-        multiplier = 1.6 + (random.uniform(0, 0.4))
+        multiplier = 1.8 + (random.uniform(0.1, 0.4))
     else:
-        multiplier = 3.5 + (random.uniform(0, 0.7))
+        multiplier = 2.4 + (random.uniform(0.2, 0.8))
     return multiplier
 
 def generate_comparative_hook(product_name, competitor_type="generic"):
