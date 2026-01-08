@@ -10,7 +10,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
  * ═══════════════════════════════════════════════════════════════
  */
 
-import { CartItem } from '../lib/cartTypes';
+import type { CartItem } from '../lib/cartTypes';
 export type { CartItem }; // Re-export for convenience if needed, but primary usage is via import
 
 const STORAGE_KEY = 'dropmasters_cart_v2';
