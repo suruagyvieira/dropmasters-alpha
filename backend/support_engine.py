@@ -72,31 +72,33 @@ class GenerativeQuantumBrain:
     def synthesize_response(self, message, product_context=None, logistics_signals=None):
         """
         Synthesizes a complete, organic-feeling response based on intent analysis.
-        This represents the 'Brain' installing phase - giving structure to chaos.
         """
-        # 1. Intent Analysis (The "Lobe")
+        # 1. Intent Analysis
         intent = "UNKNOWN"
-        if any(w in message for w in ['estoque', 'zero', 'dropshipping', 'funciona', 'modelo']): intent = "ZERO_COST"
-        elif any(w in message for w in ['tem', 'acha', 'busca', 'encontrar', 'procura']): intent = "SOURCING"
-        elif any(w in message for w in ['prazo', 'entrega', 'chega', 'rastreio']): intent = "LOGISTICS"
-        elif any(w in message for w in ['compra', 'preço', 'valor', 'desconto', 'custa']): intent = "SALES"
+        message_low = message.lower()
+        if any(w in message_low for w in ['estoque', 'zero', 'dropshipping', 'funciona', 'modelo']): intent = "ZERO_COST"
+        elif any(w in message_low for w in ['tem', 'acha', 'busca', 'encontrar', 'procura']): intent = "SOURCING"
+        elif any(w in message_low for w in ['prazo', 'entrega', 'chega', 'rastreio']): intent = "LOGISTICS"
+        elif any(w in message_low for w in ['compra', 'preço', 'valor', 'desconto', 'custa']): intent = "SALES"
         
-        # 2. Emotional State Update (The "Amydgala")
-        self._update_mood(NeuralClientBackend().analyze_sentiment(message)) # Reuse existing sentiment logic
+        # Check if we have a successful sourcing context
+        if isinstance(product_context, dict) and product_context.get('estimated_price'):
+            price = product_context['estimated_price']
+            name = product_context['name']
+            return f"🔎 Encontrei o produto que você buscava! O '{name}' está disponível para intermediação regional imediata por R$ {price:.2f}. Já cadastrei ele no nosso catálogo para você. Deseja que eu gere o link de compra agora?"
+
+        # 2. Emotional State Update
+        self._update_mood(NeuralClientBackend().analyze_sentiment(message))
         
-        # 3. Construction (The "Broca's Area")
+        # 3. Construction
         opener = self._generate_opener()
         core = self._generate_core_message(intent, product_context or message)
         action = self._generate_action(intent)
         
-        # 4. Neural Glitch/Flavor (The "Persona")
-        flavors = ["", " 🤖", " ✨", " 🚀", " [Calculando...]", " [Link Seguro]"]
+        # 4. Neural Flavor
+        flavors = ["", " 🤖", " ✨", " 🚀"]
         
         full_response = f"{opener} {core} {action}{random.choice(flavors)}"
-        
-        # 5. Memory Update
-        self.memory_buffer.append({"user": message, "ai": full_response})
-        if len(self.memory_buffer) > 5: self.memory_buffer.pop(0)
         
         return full_response
 

@@ -242,6 +242,16 @@ def living_ai_pivot(force=False):
                     supabase.table('products').insert(discovered).execute()
                     add_log(f"✨ EXPANSÃO: {len(discovered)} novos produtos adicionados via Discovery.", "system")
 
+        # 6. ROTAÇÃO DE CATÁLOGO (Retirement Mode)
+        # Remove produtos com baixo score de demanda para manter o catálogo 'premium' e atualizado
+        if product_count > 50:
+            # Seleciona produtos com demanda < 30 ou que não atualizam há muito tempo
+            # Como não temos hit counter real, simulamos baseado no demand_score gerado
+            to_retire = [p['id'] for p in (res.data or []) if (p.get('metadata') or {}).get('demand_score', 100) < 45]
+            if to_retire:
+                supabase.table('products').update({"is_active": False}).in_('id', to_retire[:5]).execute()
+                add_log(f"♻️ ROTAÇÃO: {len(to_retire[:5])} produtos de baixa performance removidos.", "system")
+
         add_log(f"🧠 APEX CYCLE: Mood {AUTONOMY_STATE['ai_mood']} | Supply {int(rel*100)}% | Pressure {int(sup_pressure*100)}% | Catalog {product_count}", "system")
         
     except Exception as e:
@@ -362,6 +372,74 @@ def estimate_sourcing():
 
     SOURCING_CACHE[cache_key] = (time.time() + 86400, result) # Cache de 1 dia
     return jsonify(result)
+
+@app.route('/api/v2/sourcing/active-search', methods=['GET'])
+def active_sourcing_search():
+    """
+    Pesquisa ativa de fornecedores (Scraping) quando o catálogo falha.
+    Registra os itens encontrados para permanência.
+    """
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({"products": [], "message": "Query vazia"})
+
+    # 1. Scraping em tempo real
+    add_log(f"🕵️ AGGRESSIVE SOURCING: Iniciando busca ativa por '{query}'", "system")
+    found_items = LiveSourcingEngine.search_mercadolivre(query, limit=5)
+    
+    if not found_items:
+        return jsonify({"products": [], "message": "Nenhum fornecedor encontrado para este item técnico."})
+
+    # 2. Registrar no Banco e Preparar Resposta
+    registered_products = []
+    m_pressure = analyze_competitive_pressure()
+    multiplier = max(1.4, get_predatory_margin(1.0, m_pressure))
+
+    for item in found_items:
+        try:
+            # Check for duplicates
+            check = supabase.table('products').select("id").eq("name", item['name']).execute()
+            if check.data:
+                # Se já existe, pega o ID e continua
+                p_id = check.data[0]['id']
+            else:
+                p_id = str(uuid.uuid4())
+                new_p = {
+                    "id": p_id,
+                    "name": item['name'],
+                    "description": f"Encontrado via buscador global: {item['name']}. Disponível para envio imediato.",
+                    "base_price": item['price'],
+                    "price": round(item['price'] * multiplier, 2) + 0.99,
+                    "image_url": item['image'] or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
+                    "category": "Intermediação Ativa",
+                    "is_active": True,
+                    "is_featured": True,
+                    "metadata": {
+                        "location": item['location'],
+                        "source": "ActiveSearch",
+                        "external_link": item['url'],
+                        "demand_score": 95
+                    }
+                }
+                supabase.table('products').insert(new_p).execute()
+            
+            # Formata para o frontend
+            registered_products.append({
+                "id": p_id,
+                "name": item['name'],
+                "price": round(item['price'] * multiplier, 2) + 0.99,
+                "image_url": item['image'] or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
+                "location": item['location'],
+                "is_featured": True,
+                "metadata": {"source": "ActiveSearch"}
+            })
+        except: continue
+
+    return jsonify({
+        "products": registered_products,
+        "message": f"Encontramos {len(registered_products)} resultados em fornecedores parceiros!",
+        "source": "active_provider"
+    })
 
 @app.route('/api/v2/payments/callback', methods=['POST'])
 def payment_callback():

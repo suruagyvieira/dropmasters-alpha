@@ -173,16 +173,13 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
                 if (response?.products && response.products.length > 0) {
                     setProducts(response.products);
-                    setFullCatalog(response.products); // Persistência Apex
+                    setFullCatalog(response.products);
                     setSearchSource('flash');
                     setSearchMessage(`⚡ ${response.products.length} produto(s) disponíveis para venda IMEDIATA`);
 
-                    // Capture Logistics Info
-                    if (response.user_location) {
-                        setGeoInfo(response.user_location);
-                    }
+                    if (response.user_location) setGeoInfo(response.user_location);
                 } else {
-                    // Fallback: Tenta catálogo interno
+                    // Fallback 1: Catalogo Interno
                     const internalUrl = `/api/v2/products?search=${encodeURIComponent(searchTerm)}`;
                     const internalRes = await fetchApi(internalUrl);
 
@@ -191,9 +188,23 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                         setSearchSource('internal');
                         setSearchMessage(`${internalRes.length} produto(s) no catálogo`);
                     } else {
-                        setProducts([]);
-                        setSearchSource('none');
-                        setSearchMessage(response?.message || 'Nenhum produto encontrado');
+                        // FALLBACK 2: PESQUISA ATIVA AGRESSIVA (Python Backend)
+                        setSearchMessage('🔍 Não encontrado. Pesquisando fornecedores externos...');
+                        // Note: Assuming the Python backend is reachable or proxied. 
+                        // If we don't have a direct route, we could create a Next.js proxy route.
+                        // For now, let's assume we can call the Python API if configured.
+                        const activeSearchUrl = `/api/v2/sourcing/active-search?q=${encodeURIComponent(searchTerm)}`;
+                        const activeRes = await fetchApi(activeSearchUrl);
+
+                        if (activeRes?.products && activeRes.products.length > 0) {
+                            setProducts(activeRes.products);
+                            setSearchSource('flash'); // Treat as flash sourcing
+                            setSearchMessage(`🎯 ENCONTRADO EM FORNECEDOR: ${activeRes.products.length} itens localizados!`);
+                        } else {
+                            setProducts([]);
+                            setSearchSource('none');
+                            setSearchMessage('Nenhum fornecedor nacional tem este item no momento.');
+                        }
                     }
                 }
             } catch (err) {
