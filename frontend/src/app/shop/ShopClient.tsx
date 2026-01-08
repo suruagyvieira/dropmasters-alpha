@@ -291,13 +291,13 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         <div style={{ padding: '8px 15px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid #22c55e', borderRadius: '100px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <DollarSign size={14} color="#22c55e" />
-                            <span style={{ fontSize: '0.65rem', fontWeight: '900', color: '#22c55e' }}>ALTO RENDIMENTO (YIELD MAX)</span>
+                            <Zap size={14} color="#22c55e" />
+                            <span style={{ fontSize: '0.65rem', fontWeight: '900', color: '#22c55e' }}>OFERTAS EM DESTAQUE</span>
                         </div>
                     </div>
                     <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontWeight: '800', letterSpacing: '1px' }}>
                         <RefreshCw size={10} className="animate-spin" style={{ marginRight: '5px' }} />
-                        AUTOMAÇÃO DE REPASSE ATIVA | ESTOQUE ZERO
+                        ESTOQUE VERIFICADO | ENVIO PARA TODO O BRASIL
                     </div>
                 </div>
 
@@ -318,7 +318,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--secondary)' }}>R$ {product.price}</span>
                                 <div style={{ fontSize: '0.6rem', color: '#22c55e', fontWeight: '900', background: 'rgba(34, 197, 94, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>
-                                    +{product.profit_margin || 45}% ROI
+                                    PRODUTO POPULAR
                                 </div>
                             </div>
 
@@ -342,10 +342,10 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
             <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '3rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                     <div className="glass" style={{ padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <BrainCircuit size={18} color="var(--secondary)" />
+                        <BrainCircuit size={18} color="var(--primary)" />
                         <div>
-                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '800' }}>CATALOG NEURAL</div>
-                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: '#fff' }}>LIVE SEARCH</div>
+                            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '800' }}>PESQUISA INTELIGENTE</div>
+                            <div style={{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--foreground)' }}>BUSCA EM TEMPO REAL</div>
                         </div>
                     </div>
 
@@ -364,8 +364,8 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
 
                 <div className="glass" style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '10px', height: 'fit-content' }}>
                     <div className={isSearching ? "pulse-ai active" : "pulse-ai"} style={{ width: '8px', height: '8px' }}></div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--secondary)' }}>
-                        {isSearching ? 'BUSCANDO...' : (searchMessage || 'INTELIGÊNCIA: STANDBY')}
+                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)' }}>
+                        {isSearching ? 'PROCESSANDO...' : (searchMessage || 'SISTEMA: PRONTO')}
                     </span>
                 </div>
             </div>
@@ -397,7 +397,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                             <Zap size={20} color="var(--primary)" fill="var(--primary)" />
                             <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span>⚡ FLASH SOURCING - VENDA IMEDIATA</span>
+                                    <span>⚡ OFERTA EXCLUSIVA - DISPONÍVEL AGORA</span>
                                     {geoInfo && (
                                         <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem' }}>
                                             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
@@ -406,7 +406,7 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                                     )}
                                 </div>
                                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos prontos para intermediação. Você ganha 35% em cada venda! | Entrega: {geoInfo ? '1-3 dias (Otimizado)' : '7-15 dias'}
+                                    Produtos com garantia de entrega e qualidade verificada. | Prazo: {geoInfo ? '2-5 dias úteis' : '7-15 dias'}
                                 </div>
                             </div>
                         </>
@@ -471,14 +471,13 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <BrainCircuit size={30} color="var(--primary)" />
                         <div>
-                            <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Concierge Omnisciente</h3>
-                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Sincronizado com a rede global 2026</p>
+                            <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>Assistente de Compras</h3>
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Suporte inteligente em tempo real</p>
                         </div>
                     </div>
 
-                    <div className="glass" style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', fontSize: '0.85rem', lineHeight: '1.6' }}>
-                        Olá! Eu sou a inteligência do sistema. Detectei sua entrada na rede.
-                        <b> O que você busca exatamente hoje?</b>
+                    <div className="glass" style={{ padding: '1rem', background: 'rgba(0,0,0,0.02)', fontSize: '0.85rem', lineHeight: '1.6' }}>
+                        Olá! Como posso ajudar você a encontrar o produto ideal hoje?
                     </div>
 
                     <div style={{ position: 'relative' }}>

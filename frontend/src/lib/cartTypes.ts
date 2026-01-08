@@ -5,5 +5,5 @@ export interface CartItem {
     price: number;
     quantity: number;
     image: string;
-    metadata?: any; // Flexible metadata for custom items
+    metadata?: Record<string, any>;
 }

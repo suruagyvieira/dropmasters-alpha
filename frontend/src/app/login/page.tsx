@@ -54,14 +54,14 @@ export default function LoginPage() {
                     <div className="glass" style={{ display: 'inline-flex', padding: '12px', borderRadius: '16px', marginBottom: '1.5rem', color: 'var(--primary)' }}>
                         <ShieldCheck size={32} />
                     </div>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Neural Login</h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Acesse seu dashboard Quantum 2026.</p>
+                    <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--foreground)' }}>Acesse sua Conta</h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Gerencie seus pedidos e preferências.</p>
                 </div>
 
                 <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <label style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>E-MAIL</label>
-                        <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', background: 'rgba(255,255,255,0.02)' }}>
+                        <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', background: 'transparent' }}>
                             <Mail size={18} color="var(--text-muted)" />
                             <input
                                 type="email"
@@ -75,8 +75,8 @@ export default function LoginPage() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>SENHA NEURAL</label>
-                        <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', background: 'rgba(255,255,255,0.02)' }}>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>SENHA</label>
+                        <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', background: 'transparent' }}>
                             <Lock size={18} color="var(--text-muted)" />
                             <input
                                 type="password"
@@ -92,13 +92,13 @@ export default function LoginPage() {
                     {error && <p style={{ color: 'var(--accent)', fontSize: '0.8rem', textAlign: 'center' }}>{error}</p>}
 
                     <button type="submit" className="btn-cyber" style={{ width: '100%', justifyContent: 'center' }} disabled={loading}>
-                        {loading ? 'AUTENTICANDO...' : 'INICIALIZAR LOGIN'} <LogIn size={18} />
+                        {loading ? 'AUTENTICANDO...' : 'ENTRAR AGORA'} <LogIn size={18} />
                     </button>
                 </form>
 
                 <div style={{ margin: '2rem 0', textAlign: 'center', position: 'relative' }}>
-                    <hr style={{ border: 'none', height: '1px', background: 'var(--glass-border)' }} />
-                    <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#0a0a0f', padding: '0 10px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>OU LOGIN SOCIAL</span>
+                    <hr style={{ border: 'none', height: '1px', background: 'var(--card-border)' }} />
+                    <span style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'var(--background)', padding: '0 10px', color: 'var(--text-muted)', fontSize: '0.7rem' }}>OU LOGIN SOCIAL</span>
                 </div>
 
                 <button onClick={handleGoogleLogin} className="glass" style={{ width: '100%', padding: '12px', background: 'rgba(255,255,255,0.05)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', fontSize: '0.9rem' }}>
@@ -106,7 +106,7 @@ export default function LoginPage() {
                 </button>
 
                 <p style={{ marginTop: '2.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    Novo na rede? <Link href="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '800' }}>CRIAR CONTA QUANTUM</Link>
+                    Novo por aqui? <Link href="/register" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '800' }}>CRIAR MINHA CONTA</Link>
                 </p>
             </div>
         </div>

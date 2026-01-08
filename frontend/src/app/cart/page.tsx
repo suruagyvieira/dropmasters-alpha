@@ -111,9 +111,9 @@ export default function CartPage() {
     if (cart.length === 0) {
         return (
             <div className="container section" style={{ textAlign: 'center' }}>
-                <h1 style={{ marginBottom: '1.5rem' }}>Cart Node Offline</h1>
+                <h1 style={{ marginBottom: '1.5rem' }}>Seu carrinho está vazio</h1>
                 <Link href="/shop" className="btn-cyber" style={{ display: 'inline-flex', margin: '0 auto' }}>
-                    <ArrowLeft size={18} /> Reabastecer Nodos
+                    <ArrowLeft size={18} /> Explorar Produtos
                 </Link>
             </div>
         );
@@ -125,7 +125,7 @@ export default function CartPage() {
 
     return (
         <div className="container section">
-            <h1 style={{ marginBottom: '3rem' }}>{step === 'cart' ? 'Cart Node' : 'Financial Tunnel'}</h1>
+            <h1 style={{ marginBottom: '3rem' }}>{step === 'cart' ? 'Carrinho de Compras' : 'Finalizar Pagamento'}</h1>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem', alignItems: 'start' }}>
 
@@ -204,8 +204,8 @@ export default function CartPage() {
                 </div>
 
                 {/* Lado Direito: Resumo e Seleção de Método */}
-                <aside className="glass" style={{ padding: '3rem', position: 'sticky', top: '120px', background: 'rgba(10, 10, 15, 0.9)' }}>
-                    <h2 style={{ fontSize: '1.75rem', marginBottom: '2rem' }}>Quantum Summary</h2>
+                <aside className="glass" style={{ padding: '3rem', position: 'sticky', top: '120px' }}>
+                    <h2 style={{ fontSize: '1.75rem', marginBottom: '2rem' }}>Resumo do Pedido</h2>
 
                     {step === 'cart' && (
                         <div style={{ marginBottom: '2.5rem' }}>
@@ -246,7 +246,7 @@ export default function CartPage() {
                     )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <span style={{ color: 'var(--text-muted)' }}>Node Value</span>
+                        <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
                         <span>R$ {total.toFixed(2)}</span>
                     </div>
                     {hasBundle && (
@@ -264,13 +264,13 @@ export default function CartPage() {
 
                     {step === 'cart' && (
                         <button onClick={handleInitiatePayment} disabled={isProcessing} className="btn-cyber" style={{ width: '100%', justifyContent: 'center', padding: '20px' }}>
-                            {isProcessing ? 'TUNNELING...' : 'INICIAR RECEBIMENTO'}
+                            {isProcessing ? 'PROCESSANDO...' : 'FINALIZAR COMPRA'}
                         </button>
                     )}
 
-                    <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', color: 'var(--secondary)' }}>
+                    <div style={{ marginTop: '2.5rem', display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', color: 'var(--success)' }}>
                         <ShieldCheck size={18} />
-                        <span style={{ fontSize: '0.75rem', fontWeight: '900' }}>QUANTUM ENCRYPTED</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: '900' }}>PAGAMENTO 100% SEGURO</span>
                     </div>
                 </aside>
             </div>

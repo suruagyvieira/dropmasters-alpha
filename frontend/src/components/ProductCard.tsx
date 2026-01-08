@@ -46,8 +46,8 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
         } else {
             addToCart({
                 id, name, price, image: optimizedImage, quantity: 1,
-                metadata: { ...metadata, business_model: businessModel }
-            } as any);
+                metadata: { ...(metadata || {}), business_model: businessModel }
+            });
         }
     };
 

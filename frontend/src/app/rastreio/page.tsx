@@ -43,16 +43,16 @@ export default function Rastreio() {
 
     return (
         <div className="container section">
-            <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Rastreio Sentiente v10</h1>
+            <h1 style={{ textAlign: 'center', marginBottom: '1rem' }}>Rastrear Pedido</h1>
             <p style={{ textAlign: 'center', marginBottom: '3rem', color: 'var(--text-muted)' }}>
-                Acompanhe o trajeto neural do seu pedido em tempo real.
+                Acompanhe o status da sua entrega em tempo real.
             </p>
 
             <div className="glass" style={{ maxWidth: '600px', margin: '0 auto 4rem auto', padding: '2rem' }}>
                 <form onSubmit={handleSearch} style={{ display: 'flex', gap: '1rem' }}>
                     <input
                         type="text"
-                        placeholder="Insira seu ID de transição (Ex: tx_...)"
+                        placeholder="Insira o Código do Pedido (Ex: PED-123...)"
                         className="glass"
                         style={{ flex: 1, padding: '16px', border: '1px solid var(--glass-border)', background: 'transparent', outline: 'none' }}
                         value={orderId}
@@ -69,8 +69,8 @@ export default function Rastreio() {
                 <div className="glass animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto', padding: '3rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                         <div>
-                            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>ID: {order.id}</h2>
-                            <p style={{ color: 'var(--text-muted)' }}>Status atual do Hub: <strong style={{ color: 'var(--primary)', textTransform: 'capitalize' }}>{order.status}</strong></p>
+                            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Pedido: {order.id}</h2>
+                            <p style={{ color: 'var(--text-muted)' }}>Status atual: <strong style={{ color: 'var(--primary)', textTransform: 'capitalize' }}>{order.status}</strong></p>
                         </div>
                         <div className="glass" style={{ padding: '12px 20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {getStatusIcon(order.status)}
@@ -81,11 +81,11 @@ export default function Rastreio() {
                     <div style={{ position: 'relative', paddingLeft: '2rem', borderLeft: '2px dashed var(--glass-border)' }}>
                         <div style={{ marginBottom: '2rem', position: 'relative' }}>
                             <div style={{ position: 'absolute', left: '-2.7rem', top: '0', background: 'var(--background)', padding: '5px' }}>
-                                <CheckCircle size={20} color={order.status !== 'pending' ? 'var(--secondary)' : '#94a3b8'} />
+                                <CheckCircle size={20} color={order.status !== 'pending' ? 'var(--success)' : '#94a3b8'} />
                             </div>
                             <h4 style={{ marginBottom: '4px' }}>Pagamento Confirmado</h4>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                {order.status !== 'pending' ? 'O Sentient Engine confirmou sua entrada no ecossistema.' : 'Aguardando confirmação do PIX/Cartão.'}
+                                {order.status !== 'pending' ? 'Seu pagamento foi confirmado e o pedido está em processamento.' : 'Aguardando confirmação do pagamento.'}
                             </p>
                         </div>
 
@@ -93,9 +93,9 @@ export default function Rastreio() {
                             <div style={{ position: 'absolute', left: '-2.7rem', top: '0', background: 'var(--background)', padding: '5px' }}>
                                 <Package size={20} color={order.status === 'shipped' ? 'var(--primary)' : '#94a3b8'} />
                             </div>
-                            <h4 style={{ marginBottom: '4px' }}>Logística Nacional (Hub SP/SC)</h4>
+                            <h4 style={{ marginBottom: '4px' }}>Logística e Envio</h4>
                             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                                {order.tracking_code ? `Objeto postado com rastreio: ${order.tracking_code}` : 'Pedido em triagem prioritária no Hub mais próximo.'}
+                                {order.tracking_code ? `Objeto postado com código de rastreio: ${order.tracking_code}` : 'Pedido sendo preparado para envio no centro de distribuição.'}
                             </p>
                         </div>
 

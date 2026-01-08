@@ -66,15 +66,15 @@ export default function SuccessPage() {
                     </div>
                 </div>
 
-                <h1 className="cyber-glitch" data-text="PAGAMENTO CONFIRMADO" style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>PAGAMENTO CONFIRMADO</h1>
-                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
-                    O repasse ao fornecedor já foi iniciado pelo **Sentient Engine**.
+                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--foreground)' }}>PAGAMENTO CONFIRMADO</h1>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '1rem' }}>
+                    Seu pedido foi recebido e já está sendo processado por nossa equipe.
                 </p>
 
                 {orderId && (
-                    <div className="glass" style={{ padding: '1rem', background: 'rgba(255,255,255,0.02)', marginBottom: '2rem', borderRadius: '12px' }}>
-                        <div style={{ fontSize: '0.6rem', color: 'var(--secondary)', fontWeight: '900', marginBottom: '4px', textTransform: 'uppercase' }}>Código da Transação</div>
-                        <div style={{ fontSize: '1rem', fontWeight: '800', color: '#fff', letterSpacing: '1px' }}>{orderId}</div>
+                    <div className="glass" style={{ padding: '1.5rem', background: '#f8fafc', marginBottom: '2rem', borderRadius: '12px' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: '700', marginBottom: '4px', textTransform: 'uppercase' }}>Código da Transação</div>
+                        <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--foreground)', letterSpacing: '0.5px' }}>{orderId}</div>
                     </div>
                 )}
 
@@ -82,7 +82,7 @@ export default function SuccessPage() {
                     <Link href="/rastreio" className="btn-cyber" style={{ justifyContent: 'center', padding: '0.8rem', fontSize: '0.8rem' }}>
                         <Package size={16} style={{ marginRight: '8px' }} /> RASTREIO
                     </Link>
-                    <Link href="/shop" className="glass" style={{ padding: '0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#fff', textDecoration: 'none' }}>
+                    <Link href="/shop" className="glass" style={{ padding: '0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--foreground)', textDecoration: 'none', background: 'white' }}>
                         <ShoppingBag size={16} /> VOLTAR À LOJA
                     </Link>
                 </div>
@@ -91,8 +91,8 @@ export default function SuccessPage() {
             {/* NEURAL UPSELL SECTION v8.9 */}
             {upsell && timeLeft > 0 && (
                 <div className="animate-fade-in" style={{ width: '100%', maxWidth: '700px' }}>
-                    <div className="glass" style={{ padding: '2.5rem', border: '2px solid var(--accent)', background: 'rgba(139, 92, 246, 0.05)', position: 'relative', overflow: 'hidden' }}>
-                        <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px 20px', background: 'var(--accent)', color: '#fff', fontSize: '0.7rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="glass" style={{ padding: '2.5rem', border: '2px solid var(--primary)', background: '#eff6ff', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: 0, right: 0, padding: '10px 20px', background: 'var(--primary)', color: '#fff', fontSize: '0.7rem', fontWeight: '900', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <Clock size={14} /> EXPIRA EM: {formatTime(timeLeft)}
                         </div>
 
@@ -102,8 +102,8 @@ export default function SuccessPage() {
                             </div>
 
                             <div style={{ textAlign: 'left' }}>
-                                <div style={{ color: 'var(--accent)', fontWeight: '900', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
-                                    <Zap size={14} fill="var(--accent)" /> OFERTA ÚNICA (OTO)
+                                <div style={{ color: 'var(--primary)', fontWeight: '900', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
+                                    <Zap size={14} fill="var(--primary)" /> OFERTA EXCLUSIVA
                                 </div>
                                 <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>{upsell.name}</h3>
                                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
@@ -111,7 +111,7 @@ export default function SuccessPage() {
                                 </p>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '2rem' }}>
-                                    <span style={{ fontSize: '2rem', fontWeight: '900', color: '#fff' }}>R$ {upsell.price.toFixed(2)}</span>
+                                    <span style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--foreground)' }}>R$ {upsell.price.toFixed(2)}</span>
                                     <span style={{ fontSize: '1rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>R$ {upsell.original_price.toFixed(2)}</span>
                                 </div>
 
@@ -135,7 +135,7 @@ export default function SuccessPage() {
                         </div>
                     </div>
                     <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                        * Adicionando agora você aproveita o mesmo frete e o desconto exclusivo da IA Sentiente.
+                        * Adicionando agora você aproveita o mesmo frete e um desconto exclusivo de agradecimento.
                     </p>
                 </div>
             )}

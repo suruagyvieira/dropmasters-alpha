@@ -53,9 +53,9 @@ export default function RegisterPage() {
                     <div style={{ color: 'var(--secondary)', marginBottom: '2rem' }}>
                         <ShieldCheck size={64} style={{ margin: '0 auto' }} />
                     </div>
-                    <h1 style={{ marginBottom: '1.5rem' }}>Perfil Criado com Sucesso!</h1>
+                    <h1 style={{ marginBottom: '1.5rem', color: 'var(--foreground)' }}>Perfil Criado com Sucesso!</h1>
                     <p style={{ color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '2.5rem' }}>
-                        Verificamos sua assinatura neural. Enviamos um e-mail de confirmação para <strong>{email}</strong>. Por favor, valide seu acesso para entrar na rede.
+                        Enviamos um e-mail de confirmação para <strong>{email}</strong>. Por favor, valide seu acesso para ativar sua conta.
                     </p>
                     <Link href="/login" className="btn-cyber" style={{ display: 'inline-flex' }}>
                         VOLTAR PARA LOGIN
@@ -69,8 +69,8 @@ export default function RegisterPage() {
         <div className="container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
             <div className="glass" style={{ width: '100%', maxWidth: '450px', padding: '3rem' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-                    <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Join the Network</h1>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Inicie sua jornada no dropshipping autônomo.</p>
+                    <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem', color: 'var(--foreground)' }}>Crie sua Conta</h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Inicie sua jornada nas vendas digitais.</p>
                 </div>
 
                 <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>SENHA NEURAL</label>
+                        <label style={{ fontSize: '0.75rem', fontWeight: '800', color: 'var(--text-muted)' }}>SENHA</label>
                         <div className="glass" style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', background: 'rgba(255,255,255,0.02)' }}>
                             <Lock size={18} color="var(--text-muted)" />
                             <input
@@ -127,12 +127,12 @@ export default function RegisterPage() {
                     </button>
 
                     <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '1rem' }}>
-                        Ao clicar em criar conta, você aceita os termos da Quantum Network de 2026.
+                        Ao clicar em criar conta, você aceita os termos da DropMasters.
                     </p>
                 </form>
 
                 <p style={{ marginTop: '2.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    Já faz parte? <Link href="/login" style={{ color: 'var(--secondary)', textDecoration: 'none', fontWeight: '800' }}>ENTRAR NA REDE</Link>
+                    Já faz parte? <Link href="/login" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '800' }}>FAZER LOGIN</Link>
                 </p>
             </div>
         </div>
