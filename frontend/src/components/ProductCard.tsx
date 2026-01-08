@@ -3,7 +3,7 @@
 import React, { memo } from 'react';
 import { ShoppingCart, Star, ExternalLink, Cpu, Clock, MapPin, Truck, Flame, TrendingUp, Users, Globe, Briefcase, CheckCircle } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-import type { CartItem } from '../lib/cart-item-types';
+import type { ShoppingCartItem } from '../lib/cart-item-types';
 import Image from 'next/image';
 
 interface ProductProps {
@@ -47,7 +47,7 @@ const ProductCard = ({ id, name, price, description, original_price, image, cate
             addToCart({
                 id, name, price, image: optimizedImage, quantity: 1,
                 metadata: { ...(metadata || {}), business_model: businessModel }
-            });
+            } as any);
         }
     };
 

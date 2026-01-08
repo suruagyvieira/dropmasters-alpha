@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { Zap, ShieldCheck, Truck, Star, ArrowRight, ShoppingCart, CheckCircle2, Users, TrendingUp, Clock } from 'lucide-react';
 import Image from 'next/image';
-import type { CartItem } from '../../../lib/cart-item-types';
+import type { ShoppingCartItem } from '../../../lib/cart-item-types';
 
 interface LandingPageClientProps {
     product: any;

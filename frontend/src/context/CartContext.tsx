@@ -10,16 +10,16 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { CartItem } from '../lib/cart-item-types';
-export type { CartItem }; // Re-export for convenience if needed, but primary usage is via import
+import type { ShoppingCartItem } from '../lib/cart-item-types';
+export type { ShoppingCartItem as CartItem }; // Keeping the alias for internal consistency if needed, but using new type for build
 
 const STORAGE_KEY = 'dropmasters_cart_v2';
 const MAX_QUANTITY = 10;
 const BUNDLE_DISCOUNT = 0.10; // 10% discount for 2+ items
 
 interface CartContextType {
-    cart: CartItem[];
-    addToCart: (item: CartItem) => void;
+    cart: ShoppingCartItem[];
+    addToCart: (item: ShoppingCartItem) => void;
     removeFromCart: (id: string) => void;
     updateQuantity: (id: string, quantity: number) => void;
     clearCart: () => void;
@@ -33,7 +33,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-    const [cart, setCart] = useState<CartItem[]>([]);
+    const [cart, setCart] = useState<ShoppingCartItem[]>([]);
     const [isHydrated, setIsHydrated] = useState(false);
 
     // SAFE LOAD from localStorage
@@ -73,7 +73,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [cart, isHydrated]);
 
-    const addToCart = useCallback((item: CartItem) => {
+    const addToCart = useCallback((item: ShoppingCartItem) => {
         setCart((prev) => {
             const existing = prev.find((i) => i.id === item.id);
             if (existing) {
