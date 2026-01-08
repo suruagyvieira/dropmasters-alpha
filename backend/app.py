@@ -206,53 +206,68 @@ def living_ai_pivot(force=False):
         if batch and supabase:
             supabase.table('products').upsert(batch).execute()
         
-        # 5. EXPANSÃO AUTOMÁTICA DE CATÁLOGO (Discovery Mode)
-        # Se tivermos poucos produtos ou a cada X ciclos, buscamos coisa nova na rede
+        # 5. EXPANSÃO AUTOMÁTICA DE CATÁLOGO (Apex Discovery Mode)
+        # Se algum nicho estiver vazio ou a cada X ciclos, buscamos coisa nova na rede
         product_count = len(res.data or [])
-        if product_count < 40 or random.random() < 0.3:
-            keyword = random.choice(LiveSourcingEngine.get_trending_keywords())
-            add_log(f"🔎 DISCOVERY: Buscando novas tendências para '{keyword}'...", "system")
-            new_items = LiveSourcingEngine.search_mercadolivre(keyword, limit=3)
+        
+        # Estratégia Proativa: Garante diversidade de categorias
+        categories = ["Eletrônicos", "Wearables", "Casa", "Ferramentas", "Áudio"]
+        existing_cats = set(p.get('category') for p in (res.data or []))
+        missing_cats = [c for c in categories if c not in existing_cats]
+
+        if product_count < 40 or missing_cats or random.random() < 0.35:
+            keyword = random.choice(missing_cats) if missing_cats else random.choice(LiveSourcingEngine.get_trending_keywords())
+            add_log(f"🔎 APEX DISCOVERY: Explorando nicho '{keyword}' para expansão", "system")
+            new_items = LiveSourcingEngine.search_mercadolivre(keyword, limit=4)
             
             if new_items:
                 discovered = []
                 for item in new_items:
-                    # Evita duplicados básicos por nome
                     if any(p['name'] == item['name'] for p in res.data or []): continue
                     
+                    # Filtro de Qualidade Neural
+                    if item['vibe_score'] < 75: continue 
+
                     base = item['price']
+                    # Geração de Copy Agressiva via Motor Apex
+                    model_info = ApexHybridEngine.select_best_model({"name": item['name']}, m_pressure)
+                    legend = ApexLegendGenerator.generate_aggressive_copy(item['name'], model_info)
+                    
                     discovered.append({
                         "id": str(uuid.uuid4()),
                         "name": item['name'],
-                        "description": f"Destaque em alta: {item['name']}. Qualidade garantida e envio regional priorizado.",
+                        "description": legend,
                         "base_price": base,
-                        "category": "Intermediação",
-                        "image_url": item['image'],
+                        "category": keyword if keyword in categories else "Intermediação Premium",
+                        "image_url": item['image'] or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
                         "price": round(base * multiplier, 2) + 0.99,
                         "is_active": True,
-                        "is_featured": True,
+                        "is_featured": item['vibe_score'] > 90,
                         "metadata": {
                             "location": item['location'],
-                            "source": "Discovery",
-                            "external_link": item['url'],
-                            "demand_score": random.randint(70, 95)
+                            "seller": item['seller'],
+                            "vibe_score": item['vibe_score'],
+                            "business_model": model_info['model'],
+                            "source": "ApexDiscovery",
+                            "demand_score": item['vibe_score']
                         }
                     })
                 if discovered:
                     supabase.table('products').insert(discovered).execute()
-                    add_log(f"✨ EXPANSÃO: {len(discovered)} novos produtos adicionados via Discovery.", "system")
+                    add_log(f"✨ EVOLUÇÃO: {len(discovered)} produtos de alta conversão integrados.", "system")
 
-        # 6. ROTAÇÃO DE CATÁLOGO (Retirement Mode)
-        # Remove produtos com baixo score de demanda para manter o catálogo 'premium' e atualizado
-        if product_count > 50:
-            # Seleciona produtos com demanda < 30 ou que não atualizam há muito tempo
-            # Como não temos hit counter real, simulamos baseado no demand_score gerado
-            to_retire = [p['id'] for p in (res.data or []) if (p.get('metadata') or {}).get('demand_score', 100) < 45]
+        # 6. ROTAÇÃO DE CATÁLOGO (Apex Selection)
+        # Mantém apenas a elite produtiva no catálogo ativo
+        if product_count > 60:
+            # Ordena por demanda score (que agora reflete o vibe_score do sourcing)
+            # Remove os 10 piores em massa para abrir espaço para o novo
+            sorted_by_worst = sorted(res.data or [], key=lambda x: (x.get('metadata') or {}).get('demand_score', 100))
+            to_retire = [p['id'] for p in sorted_by_worst[:10]]
             if to_retire:
-                supabase.table('products').update({"is_active": False}).in_('id', to_retire[:5]).execute()
-                add_log(f"♻️ ROTAÇÃO: {len(to_retire[:5])} produtos de baixa performance removidos.", "system")
+                supabase.table('products').update({"is_active": False}).in_('id', to_retire).execute()
+                add_log(f"♻️ APEX SELECTION: {len(to_retire)} itens de baixa tração arquivados.", "system")
 
-        add_log(f"🧠 APEX CYCLE: Mood {AUTONOMY_STATE['ai_mood']} | Supply {int(rel*100)}% | Pressure {int(sup_pressure*100)}% | Catalog {product_count}", "system")
+        add_log(f"🧠 APEX CYCLE: {AUTONOMY_STATE['ai_mood']} | Catalog {product_count} | Pressure {int(m_pressure*100)}%", "system")
         
     except Exception as e:
         add_log(f"Pivot Error: {e}", "error")
@@ -376,69 +391,75 @@ def estimate_sourcing():
 @app.route('/api/v2/sourcing/active-search', methods=['GET'])
 def active_sourcing_search():
     """
-    Pesquisa ativa de fornecedores (Scraping) quando o catálogo falha.
-    Registra os itens encontrados para permanência.
+    Pesquisa ativa de fornecedores (Scraping) Ultra-Agressiva.
+    Filtra pela Elite de Fornecedores e gera copy para conversão imediata.
     """
     query = request.args.get('q', '').strip()
     if not query:
-        return jsonify({"products": [], "message": "Query vazia"})
+        return jsonify({"products": [], "message": "O que você busca hoje?"})
 
-    # 1. Scraping em tempo real
-    add_log(f"🕵️ AGGRESSIVE SOURCING: Iniciando busca ativa por '{query}'", "system")
-    found_items = LiveSourcingEngine.search_mercadolivre(query, limit=5)
+    add_log(f"🕵️ APEX SOURCING: Localizando fornecedores elite para '{query}'", "system")
+    found_items = LiveSourcingEngine.search_mercadolivre(query, limit=6)
     
     if not found_items:
-        return jsonify({"products": [], "message": "Nenhum fornecedor encontrado para este item técnico."})
+        return jsonify({"products": [], "message": "Busca global refinada. Tente termos mais genéricos."})
 
-    # 2. Registrar no Banco e Preparar Resposta
     registered_products = []
     m_pressure = analyze_competitive_pressure()
     multiplier = max(1.4, get_predatory_margin(1.0, m_pressure))
 
     for item in found_items:
         try:
-            # Check for duplicates
-            check = supabase.table('products').select("id").eq("name", item['name']).execute()
+            # Filtro de Robustez: Só aceitamos itens com vibe_score alto (Fornecedores Elite)
+            if item['vibe_score'] < 70: continue
+
+            check = supabase.table('products').select("id, metadata").eq("name", item['name']).execute()
             if check.data:
-                # Se já existe, pega o ID e continua
                 p_id = check.data[0]['id']
+                final_price = round(item['price'] * multiplier, 2) + 0.99
             else:
                 p_id = str(uuid.uuid4())
+                # IA VIVA: Geração de Modelo e Copy em tempo real
+                model_info = ApexHybridEngine.select_best_model({"name": item['name']}, m_pressure)
+                legend = ApexLegendGenerator.generate_aggressive_copy(item['name'], model_info)
+                final_price = round(item['price'] * multiplier, 2) + 0.99
+
                 new_p = {
                     "id": p_id,
                     "name": item['name'],
-                    "description": f"Encontrado via buscador global: {item['name']}. Disponível para envio imediato.",
+                    "description": legend,
                     "base_price": item['price'],
-                    "price": round(item['price'] * multiplier, 2) + 0.99,
+                    "price": final_price,
                     "image_url": item['image'] or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
-                    "category": "Intermediação Ativa",
+                    "category": "Intermediação Especializada",
                     "is_active": True,
                     "is_featured": True,
                     "metadata": {
                         "location": item['location'],
-                        "source": "ActiveSearch",
-                        "external_link": item['url'],
-                        "demand_score": 95
+                        "seller": item['seller'],
+                        "vibe_score": item['vibe_score'],
+                        "business_model": model_info['model'],
+                        "source": "ActiveApex",
+                        "demand_score": item['vibe_score']
                     }
                 }
                 supabase.table('products').insert(new_p).execute()
             
-            # Formata para o frontend
             registered_products.append({
                 "id": p_id,
                 "name": item['name'],
-                "price": round(item['price'] * multiplier, 2) + 0.99,
+                "price": final_price,
                 "image_url": item['image'] or "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600",
                 "location": item['location'],
                 "is_featured": True,
-                "metadata": {"source": "ActiveSearch"}
+                "metadata": {"source": "ActiveApex", "vibe": item['vibe_score']}
             })
         except: continue
 
     return jsonify({
         "products": registered_products,
-        "message": f"Encontramos {len(registered_products)} resultados em fornecedores parceiros!",
-        "source": "active_provider"
+        "message": f"🎯 SUCESSO: Encontramos {len(registered_products)} itens de alta confiança para você!",
+        "source": "apex_active_provider"
     })
 
 @app.route('/api/v2/payments/callback', methods=['POST'])

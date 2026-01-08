@@ -381,69 +381,51 @@ export default function ShopClient({ initialProducts }: { initialProducts: Produ
                 </div>
             </div>
 
-            {/* SOURCE INDICATOR */}
+            {/* SOURCE INDICATOR APEX */}
             {searchSource && searchTerm && !isSearching && (
                 <div
-                    className="glass animate-fade-in"
+                    className="glass animate-fade-in shadow-premium"
                     style={{
                         marginBottom: '2rem',
-                        padding: '1rem 1.5rem',
+                        padding: '1.25rem 2rem',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '15px',
+                        gap: '20px',
                         background: searchSource === 'flash'
-                            ? 'rgba(139, 92, 246, 0.15)'
-                            : searchSource === 'internal'
-                                ? 'rgba(34, 197, 94, 0.1)'
-                                : 'rgba(239, 68, 68, 0.1)',
-                        borderColor: searchSource === 'flash'
-                            ? 'var(--primary)'
-                            : searchSource === 'internal'
-                                ? '#22c55e'
-                                : '#ef4444'
+                            ? 'linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%)'
+                            : 'rgba(34, 197, 94, 0.05)',
+                        borderLeft: `4px solid ${searchSource === 'flash' ? 'var(--primary)' : '#22c55e'}`
                     }}
                 >
                     {searchSource === 'flash' && (
                         <>
-                            <Zap size={20} color="var(--primary)" fill="var(--primary)" />
+                            <div className="animate-pulse">
+                                <Zap size={24} color="var(--primary)" fill="var(--primary)" />
+                            </div>
                             <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <span>⚡ OFERTA EXCLUSIVA - DISPONÍVEL AGORA</span>
-                                    {geoInfo && (
-                                        <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.7rem' }}>
-                                            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 8px var(--success)' }} />
-                                            PRIORIDADE: ESTOQUE {geoInfo.region}
-                                        </span>
-                                    )}
+                                <div style={{ fontSize: '0.9rem', fontWeight: '900', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <span>🎯 INTELIGÊNCIA APEX: FORNECEDORES ELITE LOCALIZADOS</span>
+                                    <span style={{ color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.75rem', fontWeight: '800' }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)', boxShadow: '0 0 10px var(--success)' }} />
+                                        ALTA CONFIANÇA (VIBE 90%+)
+                                    </span>
                                 </div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos com garantia de entrega e qualidade verificada. | Prazo: {geoInfo ? '2-5 dias úteis' : '7-15 dias'}
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                                    Encontramos as melhores ofertas para <strong>"{searchTerm}"</strong>.
+                                    Produtos com garantia de procedência e logística regional priorizada para sua região.
                                 </div>
                             </div>
                         </>
                     )}
                     {searchSource === 'internal' && (
                         <>
-                            <ShieldCheck size={20} color="#22c55e" />
+                            <ShieldCheck size={24} color="#22c55e" />
                             <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#22c55e' }}>
-                                    ✅ CATÁLOGO VERIFICADO
+                                <div style={{ fontSize: '0.85rem', fontWeight: '900', color: '#22c55e', marginBottom: '4px' }}>
+                                    ✅ CATÁLOGO OFICIAL DROPMASTERS
                                 </div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Produtos confirmados para venda imediata
-                                </div>
-                            </div>
-                        </>
-                    )}
-                    {searchSource === 'none' && (
-                        <>
-                            <BrainCircuit size={20} color="#ef4444" />
-                            <div>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '900', color: '#ef4444' }}>
-                                    🔍 NENHUM MATCH ENCONTRADO
-                                </div>
-                                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
-                                    Tente outras palavras-chave (ex: camera, drone, fone, smart)
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                                    Itens em estoque virtual com envio imediato e nota fiscal.
                                 </div>
                             </div>
                         </>
